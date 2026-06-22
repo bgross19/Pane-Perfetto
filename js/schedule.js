@@ -7,8 +7,8 @@ export function formatDateString(date, currentLang) {
 }
 
 export function generateSchedule(inputs, currentLang) {
-    const { hours, useBiga, isSourdough } = inputs;
-    const now = new Date();
+    const { hours, useBiga, isSourdough, startTime } = inputs;
+    const now = isSourdough ? new Date() : new Date(startTime);
     let steps = [];
 
     if (isSourdough) {

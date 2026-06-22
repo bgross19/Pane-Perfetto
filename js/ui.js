@@ -18,6 +18,7 @@ export function updateUI() {
     const tempRange = document.getElementById('tempRange');
     const breadTypeInputs = document.getElementsByName('breadType');
     const bigaToggle = document.getElementById('bigaToggle');
+    const startTimeInput = document.getElementById('startTime');
 
     let hydration = 0.65;
     let isSourdough = false;
@@ -37,7 +38,8 @@ export function updateUI() {
         temp: parseInt(tempRange.value),
         useBiga: bigaToggle.checked,
         hydration: hydration,
-        isSourdough: isSourdough
+        isSourdough: isSourdough,
+        startTime: startTimeInput.value ? new Date(startTimeInput.value) : new Date()
     };
 
     // Sync UI state for sourdough
@@ -46,9 +48,11 @@ export function updateUI() {
         bigaToggle.disabled = true;
         inputs.useBiga = false;
         document.getElementById('timeRange').parentElement.classList.add('hidden');
+        document.getElementById('startTimeContainer').classList.add('hidden');
     } else {
         bigaToggle.disabled = false;
         document.getElementById('timeRange').parentElement.classList.remove('hidden');
+        document.getElementById('startTimeContainer').classList.remove('hidden');
     }
 
     const recipe = calculateRecipe(inputs);

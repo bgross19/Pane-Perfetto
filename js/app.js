@@ -38,6 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const tempRange = document.getElementById('tempRange');
     const breadTypeInputs = document.getElementsByName('breadType');
     const bigaToggle = document.getElementById('bigaToggle');
+    const startTimeInput = document.getElementById('startTime');
+
+    // Initialize start time input to current local time
+    const now = new Date();
+    // Format required by datetime-local: YYYY-MM-DDThh:mm
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    startTimeInput.value = now.toISOString().slice(0, 16);
 
     function handleBreadTypeChange(e) {
         if (e.target.id === 'typePizza') {
@@ -54,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     timeRange.addEventListener('input', updateUI);
     tempRange.addEventListener('input', updateUI);
     bigaToggle.addEventListener('change', updateUI);
+    startTimeInput.addEventListener('input', updateUI);
     breadTypeInputs.forEach(input => input.addEventListener('change', handleBreadTypeChange));
 
     updateUI();
