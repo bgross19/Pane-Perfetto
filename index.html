@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pane Perfetto - Calcolatore Avanzato</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;500;600&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfbf7;
+            color: #2d241e;
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+        }
+        .card {
+            background: white;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+        input[type="range"] {
+            accent-color: #c2410c;
+        }
+        .ingredient-row {
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .ingredient-row:last-child {
+            border-bottom: none;
+        }
+        input[type="radio"]:checked + label {
+            background-color: #c2410c;
+            color: white;
+            border-color: #c2410c;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #c2410c;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #c2410c;
+        }
+        /* Language Toggle Classes */
+        body.lang-en .lang-it { display: none !important; }
+        body.lang-it .lang-en { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen text-sm md:text-base lang-it pb-8">
+    <nav class="sticky top-0 z-30 bg-[#fdfbf7]/95 backdrop-blur-md border-b border-orange-100 px-4 py-3 md:px-8 md:py-4 mb-6 flex justify-between items-center shadow-sm">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-orange-900 leading-none">Pane Perfetto</h1>
+            <p class="text-[11px] md:text-xs text-orange-700 italic mt-1.5">
+                <span class="lang-it">Analisi e Arte della Panificazione</span>
+                <span class="lang-en">Baking Analysis & Art</span>
+            </p>
+        </div>
+        
+        <div class="flex items-center gap-2 text-xs md:text-sm font-medium bg-white px-3 py-1.5 rounded-full shadow-sm border border-orange-100 shrink-0">
+            <button id="btnIt" class="text-orange-900 font-bold transition-colors">IT</button>
+            <span class="text-gray-300">|</span>
+            <button id="btnEn" class="text-gray-400 hover:text-orange-900 transition-colors">EN</button>
+        </div>
+    </nav>
+
+    <div class="max-w-xl mx-auto px-4 md:px-0">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-6">
+                <div class="card p-5">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                        <span>🥖</span> 
+                        <span class="lang-it">Tipo di Pane</span>
+                        <span class="lang-en">Bread Type</span>
+                    </h2>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="radio" id="typeClassico" name="breadType" value="0.65" class="hidden" checked>
+                        <label for="typeClassico" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Classico (65%)</label>
+                        
+                        <input type="radio" id="typeCiabatta" name="breadType" value="0.80" class="hidden">
+                        <label for="typeCiabatta" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Ciabatta (80%)</label>
+                        
+                        <input type="radio" id="typeFocaccia" name="breadType" value="0.75" class="hidden">
+                        <label for="typeFocaccia" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Focaccia (75%)</label>
+                        
+                        <input type="radio" id="typePizza" name="breadType" value="0.62" class="hidden">
+                        <label for="typePizza" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Pizza (62%)</label>
+                    </div>
+                </div>
+
+                <div class="card p-5">
+                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                        <span>⚖️</span> 
+                        <span class="lang-it">Parametri</span>
+                        <span class="lang-en">Parameters</span>
+                    </h2>
+                    
+                    <div class="mb-5">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase">
+                                <span class="lang-it">Farina per pagnotta (g)</span>
+                                <span class="lang-en">Flour per unit (g)</span>
+                            </label>
+                            <span id="flourValue" class="font-bold text-orange-700">500g</span>
+                        </div>
+                        <input type="range" id="flourRange" min="100" max="1000" step="10" value="500" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="mb-5">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase">
+                                <span class="lang-it">Numero di Pagnotte</span>
+                                <span class="lang-en">Number of Units</span>
+                            </label>
+                            <span id="loafValue" class="font-bold text-orange-700">1</span>
+                        </div>
+                        <input type="range" id="loafRange" min="1" max="10" step="1" value="1" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="mb-5">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase">
+                                <span class="lang-it">Lievitazione (ore)</span>
+                                <span class="lang-en">Proofing Time (hrs)</span>
+                            </label>
+                            <span id="timeValue" class="font-bold text-orange-700">4</span>
+                        </div>
+                        <input type="range" id="timeRange" min="2" max="24" step="1" value="4" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <label class="text-xs font-medium text-gray-500 uppercase">
+                                <span class="lang-it">Temperatura (°F)</span>
+                                <span class="lang-en">Temperature (°F)</span>
+                            </label>
+                            <span id="tempValue" class="font-bold text-orange-700">72°F</span>
+                        </div>
+                        <input type="range" id="tempRange" min="60" max="90" step="1" value="72" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200 mt-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">🥣</span>
+                            <div>
+                                <p class="text-xs font-bold text-stone-800">
+                                    <span class="lang-it">Usa Biga (Prefermento)</span>
+                                    <span class="lang-en">Use Biga (Pre-ferment)</span>
+                                </p>
+                                <p class="text-[10px] text-stone-500">
+                                    <span class="lang-it">Migliora aroma e alveoli</span>
+                                    <span class="lang-en">Improves aroma & crumb</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="bigaToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer outline-none"/>
+                            <label for="bigaToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <div class="card p-5 border-2 border-orange-100">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2" id="ricettaTitle">
+                        <span>📝</span> <span class="lang-it">Ricetta Totale</span><span class="lang-en">Total Recipe</span>
+                    </h2>
+
+                    <div class="mb-4 bg-orange-50/50 p-2 rounded-lg border border-orange-100">
+                        <div class="flex justify-between text-[10px] font-bold text-orange-900/60 mb-1 uppercase tracking-wider">
+                            <span class="lang-it">Composizione Massa (100% Totale)</span><span class="lang-en">Mass Composition (100% Total)</span>
+                        </div>
+                        <div class="w-full h-2.5 flex rounded-full overflow-hidden bg-gray-100">
+                            <div id="barFlour" class="bg-amber-200 transition-all duration-300" style="width: 50%" title="Flour"></div>
+                            <div id="barWater" class="bg-blue-300 transition-all duration-300" style="width: 35%" title="Water"></div>
+                            <div id="barSalt" class="bg-gray-400 transition-all duration-300" style="width: 5%" title="Salt"></div>
+                            <div id="barYeast" class="bg-orange-600 transition-all duration-300" style="width: 10%" title="Yeast"></div>
+                        </div>
+                        <div class="flex justify-between text-[9px] text-gray-500 mt-1 px-1">
+                            <span id="lblFlourVisual">Farina</span>
+                            <span id="lblHydrationVisual">Acqua</span>
+                        </div>
+                    </div>
+                    
+                    <div id="bigaSection" class="hidden mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                        <h3 class="text-sm font-bold text-orange-900 mb-2">
+                            <span class="lang-it">1. Biga (Preparare 12-16h prima)</span>
+                            <span class="lang-en">1. Biga (Mix 12-16h prior)</span>
+                        </h3>
+                        <div class="space-y-1 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 italic">
+                                    <span class="lang-it">Farina (30% del tot.)</span><span class="lang-en">Flour (30% of total)</span>
+                                </span>
+                                <span class="font-bold" id="resBigaFlour">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600 italic">
+                                    <span class="lang-it">Acqua (45% idrat.)</span><span class="lang-en">Water (45% hydrat.)</span>
+                                </span>
+                                <span class="font-bold" id="resBigaWater">-</span>
+                            </div>
+                            <div class="flex justify-between text-orange-800">
+                                <span class="font-medium italic">
+                                    <span class="lang-it">Lievito</span><span class="lang-en">Yeast</span>
+                                </span>
+                                <span class="font-bold" id="resBigaYeast">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-sm font-bold text-stone-800 mb-2 hidden" id="mainDoughTitle">
+                        <span class="lang-it">2. Impasto Principale</span><span class="lang-en">2. Main Dough</span>
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="ingredient-row flex justify-between py-1.5">
+                            <span class="text-gray-600 italic" id="labelMainFlour">Farina</span>
+                            <span class="font-bold" id="resFlour">500g</span>
+                        </div>
+                        <div class="ingredient-row flex justify-between py-1.5">
+                            <span class="text-gray-600 italic" id="labelWater">Acqua</span>
+                            <span class="font-bold" id="resWater">325g</span>
+                        </div>
+                        <div class="ingredient-row flex justify-between py-1.5">
+                            <span class="text-gray-600 italic">
+                                <span class="lang-it">Sale (2%)</span><span class="lang-en">Salt (2%)</span>
+                            </span>
+                            <span class="font-bold" id="resSalt">10g</span>
+                        </div>
+                        <div class="ingredient-row flex justify-between py-1.5 text-orange-800 bg-orange-50 px-2 rounded">
+                            <span class="font-medium italic" id="labelMainYeast">Lievito Secco</span>
+                            <span class="font-bold" id="resYeast">2.5g</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-dashed border-gray-200 flex justify-between items-center text-orange-900">
+                        <span class="text-xs font-bold uppercase tracking-wider">
+                            <span class="lang-it">Massa Totale</span><span class="lang-en">Total Dough Mass</span>
+                        </span>
+                        <span class="text-lg font-bold" id="totalWeight">847g</span>
+                    </div>
+                </div>
+
+                <div class="card p-5 bg-stone-50 border border-stone-200">
+                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-stone-800">
+                        <span>⏰</span> 
+                        <span class="lang-it">Tabella di Marcia</span><span class="lang-en">Baking Schedule</span>
+                    </h2>
+                    <div class="space-y-3 text-xs" id="scheduleContainer">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 card p-6 bg-orange-900 text-orange-50">
+            <h3 class="text-xl font-bold mb-4 border-b border-orange-800 pb-2 italic">
+                <span class="lang-it">Vocabolario ed Etimologia</span>
+                <span class="lang-en">Vocabulary & Etymology</span>
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div>
+                    <span class="font-bold text-orange-300">Farina</span> (Flour) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "farina" (from "far", spelt/grain)</span>
+                </div>
+                <div>
+                    <span class="font-bold text-orange-300">Lievito</span> (Yeast) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "levare" (to raise/lift)</span>
+                </div>
+                <div>
+                    <span class="font-bold text-orange-300">Impasto</span> (Dough) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Vulgar Latin "impastare" (to put in paste)</span>
+                </div>
+                <div>
+                    <span class="font-bold text-orange-300">Focaccia</span> (Flatbread) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "panis focacius" (hearth bread, from "focus")</span>
+                </div>
+                <div>
+                    <span class="font-bold text-orange-300">Biga</span> (Pre-ferment) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "bigae" (two-horse chariot, driving fermentation)</span>
+                </div>
+                <div>
+                    <span class="font-bold text-orange-300">Alveoli</span> (Crumb holes) <br>
+                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "alveolus" (small hollow/cavity)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="mt-8 text-center text-gray-400 text-xs pb-12">
+            <p>Pane Perfetto v3.1 • <span class="lang-it">Progettato per gli amanti del dettaglio</span><span class="lang-en">Designed for the detail-oriented</span></p>
+        </footer>
+    </div>
+
+    <script>
+        // Language State
+        let currentLang = 'it';
+        const body = document.body;
+        const btnIt = document.getElementById('btnIt');
+        const btnEn = document.getElementById('btnEn');
+
+        btnIt.addEventListener('click', () => {
+            currentLang = 'it';
+            body.classList.replace('lang-en', 'lang-it');
+            btnIt.classList.replace('text-gray-400', 'text-orange-900');
+            btnEn.classList.replace('text-orange-900', 'text-gray-400');
+            updateRecipe();
+        });
+
+        btnEn.addEventListener('click', () => {
+            currentLang = 'en';
+            body.classList.replace('lang-it', 'lang-en');
+            btnEn.classList.replace('text-gray-400', 'text-orange-900');
+            btnIt.classList.replace('text-orange-900', 'text-gray-400');
+            updateRecipe();
+        });
+
+        const flourRange = document.getElementById('flourRange');
+        const loafRange = document.getElementById('loafRange');
+        const timeRange = document.getElementById('timeRange');
+        const tempRange = document.getElementById('tempRange');
+        const breadTypeInputs = document.getElementsByName('breadType');
+        const bigaToggle = document.getElementById('bigaToggle');
+
+        const flourDisplay = document.getElementById('flourValue');
+        const loafDisplay = document.getElementById('loafValue');
+        const timeDisplay = document.getElementById('timeValue');
+        const tempDisplay = document.getElementById('tempValue');
+        const labelWater = document.getElementById('labelWater');
+        const totalWeightDisplay = document.getElementById('totalWeight');
+        const scheduleContainer = document.getElementById('scheduleContainer');
+        
+        const bigaSection = document.getElementById('bigaSection');
+        const mainDoughTitle = document.getElementById('mainDoughTitle');
+        const ricettaTitle = document.getElementById('ricettaTitle');
+        const labelMainFlour = document.getElementById('labelMainFlour');
+        const labelMainYeast = document.getElementById('labelMainYeast');
+        
+        const resBigaFlour = document.getElementById('resBigaFlour');
+        const resBigaWater = document.getElementById('resBigaWater');
+        const resBigaYeast = document.getElementById('resBigaYeast');
+
+        const resFlour = document.getElementById('resFlour');
+        const resWater = document.getElementById('resWater');
+        const resSalt = document.getElementById('resSalt');
+        const resYeast = document.getElementById('resYeast');
+
+        // Baker's Math Visualizer Elements
+        const barFlour = document.getElementById('barFlour');
+        const barWater = document.getElementById('barWater');
+        const barSalt = document.getElementById('barSalt');
+        const barYeast = document.getElementById('barYeast');
+        const lblFlourVisual = document.getElementById('lblFlourVisual');
+        const lblHydrationVisual = document.getElementById('lblHydrationVisual');
+
+        function calculateYeast(flour, hours, tempF) {
+            const basePercent = 0.015;
+            const tempFactor = Math.pow(2, (tempF - 70) / 12.6);
+            const timeFactor = 2 / hours;
+            let yeastAmount = flour * basePercent * timeFactor / tempFactor;
+            // Return precise decimal for further math operations
+            return Math.max(0.1, yeastAmount);
+        }
+
+        function formatTime(date) {
+            return date.toLocaleTimeString(currentLang === 'it' ? 'it-IT' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatDateString(date) {
+            return date.toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        }
+
+        function updateRecipe() {
+            const baseFlour = parseInt(flourRange.value);
+            const loaves = parseInt(loafRange.value);
+            const totalFlour = baseFlour * loaves;
+            const hours = parseInt(timeRange.value);
+            const temp = parseInt(tempRange.value);
+            const useBiga = bigaToggle.checked;
+            
+            let hydration = 0.65;
+            for (const input of breadTypeInputs) {
+                if (input.checked) hydration = parseFloat(input.value);
+            }
+
+            const totalWater = Math.round(totalFlour * hydration);
+            const totalSalt = Math.round(totalFlour * 0.02);
+            
+            let totalYeast = calculateYeast(totalFlour, hours, temp);
+            let mainFlour = totalFlour;
+            let mainWater = totalWater;
+            let mainYeast = Math.round(totalYeast * 10) / 10;
+            let bigaFlour = 0;
+            let bigaWater = 0;
+            let bigaYeast = 0;
+
+            if (useBiga) {
+                // 1. Dynamic Biga Math
+                bigaFlour = Math.round(totalFlour * 0.30);
+                bigaWater = Math.round(bigaFlour * 0.45);
+                
+                // Calculate temperature factor (Baseline 70°F)
+                const tempFactor = Math.pow(2, (temp - 70) / 12.6);
+                
+                // Base Biga Yeast is 0.4% at 70°F. Decrease it for warmer kitchens.
+                const calculatedBigaYeast = bigaFlour * (0.004 / tempFactor);
+                bigaYeast = Math.max(0.1, Math.round(calculatedBigaYeast * 10) / 10); 
+
+                // 2. Main Dough Math
+                mainFlour = totalFlour - bigaFlour;
+                mainWater = totalWater - bigaWater;
+                
+                // 3. Dynamic Exponential Correction
+                const supplementalYeastNeeded = calculateYeast(mainFlour, hours, temp);
+                
+                // The warmer the kitchen, the more active the Biga is, replacing MORE main yeast.
+                // Base remaining yeast is 40% (0.4) at 70°F. Divide by tempFactor to reduce further in heat.
+                const reductionFactor = 0.4 / tempFactor; 
+                
+                mainYeast = Math.max(0, Math.round((supplementalYeastNeeded * reductionFactor) * 10) / 10);
+                
+                // Calculate actual total yeast used
+                totalYeast = bigaYeast + mainYeast;
+
+                resBigaFlour.textContent = bigaFlour + 'g';
+                resBigaWater.textContent = bigaWater + 'g';
+                resBigaYeast.textContent = bigaYeast + 'g';
+                
+                bigaSection.classList.remove('hidden');
+                mainDoughTitle.classList.remove('hidden');
+                ricettaTitle.innerHTML = currentLang === 'it' ? '<span>📝</span> Ricetta Divisa' : '<span>📝</span> Split Recipe';
+                labelMainFlour.textContent = currentLang === 'it' ? 'Farina Rimanente' : 'Remaining Flour';
+                labelWater.textContent = currentLang === 'it' ? 'Acqua Rimanente' : 'Remaining Water';
+                labelMainYeast.textContent = currentLang === 'it' ? 'Lievito Rimanente' : 'Remaining Yeast';
+            } else {
+                totalYeast = Math.round(totalYeast * 10) / 10;
+                mainYeast = totalYeast;
+                
+                bigaSection.classList.add('hidden');
+                mainDoughTitle.classList.add('hidden');
+                ricettaTitle.innerHTML = currentLang === 'it' ? '<span>📝</span> Ricetta Totale' : '<span>📝</span> Total Recipe';
+                labelMainFlour.textContent = currentLang === 'it' ? 'Farina' : 'Flour';
+                labelWater.textContent = currentLang === 'it' ? `Acqua (${Math.round(hydration * 100)}%)` : `Water (${Math.round(hydration * 100)}%)`;
+                labelMainYeast.textContent = currentLang === 'it' ? 'Lievito Secco' : 'Dry Yeast';
+            }
+
+            // Update Mass Composition Visualization (True Percentages adding to 100%)
+            const totalDoughWeight = totalFlour + totalWater + totalSalt + totalYeast;
+            const trueFlourPct = (totalFlour / totalDoughWeight) * 100;
+            const trueWaterPct = (totalWater / totalDoughWeight) * 100;
+            const trueSaltPct = (totalSalt / totalDoughWeight) * 100;
+            const trueYeastPct = (totalYeast / totalDoughWeight) * 100;
+            
+            barFlour.style.width = `${trueFlourPct}%`;
+            barWater.style.width = `${trueWaterPct}%`;
+            barSalt.style.width = `${trueSaltPct}%`;
+            barYeast.style.width = `${trueYeastPct}%`;
+            
+            barFlour.title = currentLang === 'it' ? `Farina: ${trueFlourPct.toFixed(1)}%` : `Flour: ${trueFlourPct.toFixed(1)}%`;
+            barWater.title = currentLang === 'it' ? `Acqua: ${trueWaterPct.toFixed(1)}%` : `Water: ${trueWaterPct.toFixed(1)}%`;
+            barSalt.title = currentLang === 'it' ? `Sale: ${trueSaltPct.toFixed(1)}%` : `Salt: ${trueSaltPct.toFixed(1)}%`;
+            barYeast.title = currentLang === 'it' ? `Lievito: ${trueYeastPct.toFixed(1)}%` : `Yeast: ${trueYeastPct.toFixed(1)}%`;
+
+            lblFlourVisual.textContent = currentLang === 'it' ? `Farina (${Math.round(trueFlourPct)}%)` : `Flour (${Math.round(trueFlourPct)}%)`;
+            lblHydrationVisual.textContent = currentLang === 'it' ? `Acqua (${Math.round(trueWaterPct)}%)` : `Water (${Math.round(trueWaterPct)}%)`;
+
+            // Update Input Labels
+            flourDisplay.textContent = baseFlour + 'g';
+            loafDisplay.textContent = loaves;
+            timeDisplay.textContent = hours + (currentLang === 'it' ? ' ore' : ' hrs');
+            tempDisplay.textContent = temp + '°F';
+
+            // Update Ingredients (Main Dough)
+            resFlour.textContent = mainFlour + 'g';
+            resWater.textContent = mainWater + 'g';
+            resSalt.textContent = totalSalt + 'g';
+            resYeast.textContent = mainYeast + 'g';
+            totalWeightDisplay.textContent = totalDoughWeight.toFixed(0) + 'g';
+
+            // Update Schedule Dynamic Logic
+            const now = new Date();
+            let steps = [];
+            
+            if (useBiga) {
+                const bigaTime = new Date(now);
+                const mainMixTime = new Date(now.getTime() + 12 * 3600000); // 12 hours later
+                const foldTime = new Date(mainMixTime.getTime() + 30 * 60000);
+                const bakeTime = new Date(mainMixTime.getTime() + hours * 3600000);
+                const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
+
+                steps = [
+                    { 
+                        title: { it: "Preparazione Biga", en: "Mix Biga" }, 
+                        desc: { it: "Impasta la Biga. Lascia a temperatura ambiente.", en: "Mix the preferment. Rest at room temp." }, 
+                        time: bigaTime, date: bigaTime, color: "orange-600" 
+                    },
+                    { 
+                        title: { it: "Impasto Principale", en: "Main Dough" }, 
+                        desc: { it: "Aggiungi gli ingredienti rimanenti.", en: "Add remaining ingredients to the Biga." }, 
+                        time: mainMixTime, date: mainMixTime, color: "orange-500" 
+                    },
+                    { 
+                        title: { it: "Primo Set di Pieghe", en: "First Fold" }, 
+                        desc: { it: "Rafforza la maglia glutinica.", en: "Strengthen the dough structure." }, 
+                        time: foldTime, date: foldTime, color: "orange-300" 
+                    },
+                    { 
+                        title: { it: "Infornare", en: "Bake" }, 
+                        desc: { it: "Forno a 450°F (preriscalda la pentola!).", en: "450°F oven (preheat Dutch oven!)." }, 
+                        time: bakeTime, date: bakeTime, color: "stone-800", text: "white" 
+                    },
+                    { 
+                        title: { it: "Pronto da Mangiare", en: "Ready to Eat" }, 
+                        desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" }, 
+                        time: coolingTime, date: coolingTime, color: "green-400", text: "green-800" 
+                    }
+                ];
+            } else {
+                const start = new Date(now);
+                const fold1 = new Date(now.getTime() + 30 * 60000);
+                const bakeTime = new Date(now.getTime() + hours * 3600000);
+                const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
+
+                steps = [
+                    { 
+                        title: { it: "Impasto Iniziale", en: "Initial Mix" }, 
+                        desc: { it: "Mischia farina, acqua, lievito e sale.", en: "Mix flour, water, yeast, and salt." }, 
+                        time: start, date: start, color: "orange-500" 
+                    },
+                    { 
+                        title: { it: "Primo Set di Pieghe", en: "First Fold" }, 
+                        desc: { it: "Rafforza l'impasto.", en: "Strengthen the dough." }, 
+                        time: fold1, date: fold1, color: "orange-300" 
+                    },
+                    { 
+                        title: { it: "Infornare", en: "Bake" }, 
+                        desc: { it: "Preriscalda la pentola 30 min prima.", en: "Preheat Dutch oven 30 mins before this." }, 
+                        time: bakeTime, date: bakeTime, color: "stone-800", text: "white" 
+                    },
+                    { 
+                        title: { it: "Pronto da Mangiare", en: "Ready to Eat" }, 
+                        desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" }, 
+                        time: coolingTime, date: coolingTime, color: "green-400", text: "green-800" 
+                    }
+                ];
+            }
+
+            scheduleContainer.innerHTML = steps.map(s => `
+                <div class="flex items-center justify-between border-l-2 border-${s.color} pl-3">
+                    <div>
+                        <p class="font-bold text-gray-800">${s.title[currentLang]}</p>
+                        <p class="text-gray-500 text-[10px]">${s.desc[currentLang]}</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="${s.text ? `text-${s.text}` : 'text-gray-700'} ${s.text === 'white' ? `bg-${s.color} px-2 py-0.5 rounded shadow-sm` : ''} font-bold">${formatTime(s.time)}</span>
+                        ${useBiga ? `<span class="text-[9px] text-gray-400 mt-0.5">${formatDateString(s.date)}</span>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function handleBreadTypeChange(e) {
+            if (e.target.id === 'typePizza') {
+                // 150g flour yields ~247g total dough mass, perfect for a single pizza
+                flourRange.value = 150; 
+            } else if (e.target.id !== 'typePizza' && parseInt(flourRange.value) < 250) {
+                // If switching back to a standard bread type from a small pizza, reset to normal loaf
+                flourRange.value = 500;
+            }
+            updateRecipe();
+        }
+
+        flourRange.addEventListener('input', updateRecipe);
+        loafRange.addEventListener('input', updateRecipe);
+        timeRange.addEventListener('input', updateRecipe);
+        tempRange.addEventListener('input', updateRecipe);
+        bigaToggle.addEventListener('change', updateRecipe);
+        breadTypeInputs.forEach(input => input.addEventListener('change', handleBreadTypeChange));
+        
+        // Initial run
+        updateRecipe();
+    </script>
+</body>
+</html>
