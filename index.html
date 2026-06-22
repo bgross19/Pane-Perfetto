@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#c2410c">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
     <title>Pane Perfetto - Calcolatore Avanzato</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -85,6 +88,9 @@
                         
                         <input type="radio" id="typePizza" name="breadType" value="0.62" class="hidden">
                         <label for="typePizza" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Pizza (62%)</label>
+
+                        <input type="radio" id="typeSourdough" name="breadType" value="0.70" class="hidden">
+                        <label for="typeSourdough" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium col-span-2">Sourdough / Lievito Madre (70%)</label>
                     </div>
                 </div>
 
@@ -232,6 +238,13 @@
                             <span class="font-medium italic" id="labelMainYeast">Lievito Secco</span>
                             <span class="font-bold" id="resYeast">2.5g</span>
                         </div>
+                        <div id="sourdoughStarterRow" class="hidden ingredient-row flex justify-between py-1.5 text-orange-800 bg-orange-50 px-2 rounded">
+                            <span class="font-medium italic">
+                                <span class="lang-it">Lievito Madre (100% idrat.)</span>
+                                <span class="lang-en">Sourdough Starter (100% hydrat.)</span>
+                            </span>
+                            <span class="font-bold" id="resSourdoughStarter">-</span>
+                        </div>
                     </div>
 
                     <div class="mt-4 pt-3 border-t border-dashed border-gray-200 flex justify-between items-center text-orange-900">
@@ -291,293 +304,6 @@
         </footer>
     </div>
 
-    <script>
-        // Language State
-        let currentLang = 'it';
-        const body = document.body;
-        const btnIt = document.getElementById('btnIt');
-        const btnEn = document.getElementById('btnEn');
-
-        btnIt.addEventListener('click', () => {
-            currentLang = 'it';
-            body.classList.replace('lang-en', 'lang-it');
-            btnIt.classList.replace('text-gray-400', 'text-orange-900');
-            btnEn.classList.replace('text-orange-900', 'text-gray-400');
-            updateRecipe();
-        });
-
-        btnEn.addEventListener('click', () => {
-            currentLang = 'en';
-            body.classList.replace('lang-it', 'lang-en');
-            btnEn.classList.replace('text-gray-400', 'text-orange-900');
-            btnIt.classList.replace('text-orange-900', 'text-gray-400');
-            updateRecipe();
-        });
-
-        const flourRange = document.getElementById('flourRange');
-        const loafRange = document.getElementById('loafRange');
-        const timeRange = document.getElementById('timeRange');
-        const tempRange = document.getElementById('tempRange');
-        const breadTypeInputs = document.getElementsByName('breadType');
-        const bigaToggle = document.getElementById('bigaToggle');
-
-        const flourDisplay = document.getElementById('flourValue');
-        const loafDisplay = document.getElementById('loafValue');
-        const timeDisplay = document.getElementById('timeValue');
-        const tempDisplay = document.getElementById('tempValue');
-        const labelWater = document.getElementById('labelWater');
-        const totalWeightDisplay = document.getElementById('totalWeight');
-        const scheduleContainer = document.getElementById('scheduleContainer');
-        
-        const bigaSection = document.getElementById('bigaSection');
-        const mainDoughTitle = document.getElementById('mainDoughTitle');
-        const ricettaTitle = document.getElementById('ricettaTitle');
-        const labelMainFlour = document.getElementById('labelMainFlour');
-        const labelMainYeast = document.getElementById('labelMainYeast');
-        
-        const resBigaFlour = document.getElementById('resBigaFlour');
-        const resBigaWater = document.getElementById('resBigaWater');
-        const resBigaYeast = document.getElementById('resBigaYeast');
-
-        const resFlour = document.getElementById('resFlour');
-        const resWater = document.getElementById('resWater');
-        const resSalt = document.getElementById('resSalt');
-        const resYeast = document.getElementById('resYeast');
-
-        // Baker's Math Visualizer Elements
-        const barFlour = document.getElementById('barFlour');
-        const barWater = document.getElementById('barWater');
-        const barSalt = document.getElementById('barSalt');
-        const barYeast = document.getElementById('barYeast');
-        const lblFlourVisual = document.getElementById('lblFlourVisual');
-        const lblHydrationVisual = document.getElementById('lblHydrationVisual');
-
-        function calculateYeast(flour, hours, tempF) {
-            const basePercent = 0.015;
-            const tempFactor = Math.pow(2, (tempF - 70) / 12.6);
-            const timeFactor = 2 / hours;
-            let yeastAmount = flour * basePercent * timeFactor / tempFactor;
-            // Return precise decimal for further math operations
-            return Math.max(0.1, yeastAmount);
-        }
-
-        function formatTime(date) {
-            return date.toLocaleTimeString(currentLang === 'it' ? 'it-IT' : 'en-US', { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        function formatDateString(date) {
-            return date.toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-        }
-
-        function updateRecipe() {
-            const baseFlour = parseInt(flourRange.value);
-            const loaves = parseInt(loafRange.value);
-            const totalFlour = baseFlour * loaves;
-            const hours = parseInt(timeRange.value);
-            const temp = parseInt(tempRange.value);
-            const useBiga = bigaToggle.checked;
-            
-            let hydration = 0.65;
-            for (const input of breadTypeInputs) {
-                if (input.checked) hydration = parseFloat(input.value);
-            }
-
-            const totalWater = Math.round(totalFlour * hydration);
-            const totalSalt = Math.round(totalFlour * 0.02);
-            
-            let totalYeast = calculateYeast(totalFlour, hours, temp);
-            let mainFlour = totalFlour;
-            let mainWater = totalWater;
-            let mainYeast = Math.round(totalYeast * 10) / 10;
-            let bigaFlour = 0;
-            let bigaWater = 0;
-            let bigaYeast = 0;
-
-            if (useBiga) {
-                // 1. Dynamic Biga Math
-                bigaFlour = Math.round(totalFlour * 0.30);
-                bigaWater = Math.round(bigaFlour * 0.45);
-                
-                // Calculate temperature factor (Baseline 70°F)
-                const tempFactor = Math.pow(2, (temp - 70) / 12.6);
-                
-                // Base Biga Yeast is 0.4% at 70°F. Decrease it for warmer kitchens.
-                const calculatedBigaYeast = bigaFlour * (0.004 / tempFactor);
-                bigaYeast = Math.max(0.1, Math.round(calculatedBigaYeast * 10) / 10); 
-
-                // 2. Main Dough Math
-                mainFlour = totalFlour - bigaFlour;
-                mainWater = totalWater - bigaWater;
-                
-                // 3. Dynamic Exponential Correction
-                const supplementalYeastNeeded = calculateYeast(mainFlour, hours, temp);
-                
-                // The warmer the kitchen, the more active the Biga is, replacing MORE main yeast.
-                // Base remaining yeast is 40% (0.4) at 70°F. Divide by tempFactor to reduce further in heat.
-                const reductionFactor = 0.4 / tempFactor; 
-                
-                mainYeast = Math.max(0, Math.round((supplementalYeastNeeded * reductionFactor) * 10) / 10);
-                
-                // Calculate actual total yeast used
-                totalYeast = bigaYeast + mainYeast;
-
-                resBigaFlour.textContent = bigaFlour + 'g';
-                resBigaWater.textContent = bigaWater + 'g';
-                resBigaYeast.textContent = bigaYeast + 'g';
-                
-                bigaSection.classList.remove('hidden');
-                mainDoughTitle.classList.remove('hidden');
-                ricettaTitle.innerHTML = currentLang === 'it' ? '<span>📝</span> Ricetta Divisa' : '<span>📝</span> Split Recipe';
-                labelMainFlour.textContent = currentLang === 'it' ? 'Farina Rimanente' : 'Remaining Flour';
-                labelWater.textContent = currentLang === 'it' ? 'Acqua Rimanente' : 'Remaining Water';
-                labelMainYeast.textContent = currentLang === 'it' ? 'Lievito Rimanente' : 'Remaining Yeast';
-            } else {
-                totalYeast = Math.round(totalYeast * 10) / 10;
-                mainYeast = totalYeast;
-                
-                bigaSection.classList.add('hidden');
-                mainDoughTitle.classList.add('hidden');
-                ricettaTitle.innerHTML = currentLang === 'it' ? '<span>📝</span> Ricetta Totale' : '<span>📝</span> Total Recipe';
-                labelMainFlour.textContent = currentLang === 'it' ? 'Farina' : 'Flour';
-                labelWater.textContent = currentLang === 'it' ? `Acqua (${Math.round(hydration * 100)}%)` : `Water (${Math.round(hydration * 100)}%)`;
-                labelMainYeast.textContent = currentLang === 'it' ? 'Lievito Secco' : 'Dry Yeast';
-            }
-
-            // Update Mass Composition Visualization (True Percentages adding to 100%)
-            const totalDoughWeight = totalFlour + totalWater + totalSalt + totalYeast;
-            const trueFlourPct = (totalFlour / totalDoughWeight) * 100;
-            const trueWaterPct = (totalWater / totalDoughWeight) * 100;
-            const trueSaltPct = (totalSalt / totalDoughWeight) * 100;
-            const trueYeastPct = (totalYeast / totalDoughWeight) * 100;
-            
-            barFlour.style.width = `${trueFlourPct}%`;
-            barWater.style.width = `${trueWaterPct}%`;
-            barSalt.style.width = `${trueSaltPct}%`;
-            barYeast.style.width = `${trueYeastPct}%`;
-            
-            barFlour.title = currentLang === 'it' ? `Farina: ${trueFlourPct.toFixed(1)}%` : `Flour: ${trueFlourPct.toFixed(1)}%`;
-            barWater.title = currentLang === 'it' ? `Acqua: ${trueWaterPct.toFixed(1)}%` : `Water: ${trueWaterPct.toFixed(1)}%`;
-            barSalt.title = currentLang === 'it' ? `Sale: ${trueSaltPct.toFixed(1)}%` : `Salt: ${trueSaltPct.toFixed(1)}%`;
-            barYeast.title = currentLang === 'it' ? `Lievito: ${trueYeastPct.toFixed(1)}%` : `Yeast: ${trueYeastPct.toFixed(1)}%`;
-
-            lblFlourVisual.textContent = currentLang === 'it' ? `Farina (${Math.round(trueFlourPct)}%)` : `Flour (${Math.round(trueFlourPct)}%)`;
-            lblHydrationVisual.textContent = currentLang === 'it' ? `Acqua (${Math.round(trueWaterPct)}%)` : `Water (${Math.round(trueWaterPct)}%)`;
-
-            // Update Input Labels
-            flourDisplay.textContent = baseFlour + 'g';
-            loafDisplay.textContent = loaves;
-            timeDisplay.textContent = hours + (currentLang === 'it' ? ' ore' : ' hrs');
-            tempDisplay.textContent = temp + '°F';
-
-            // Update Ingredients (Main Dough)
-            resFlour.textContent = mainFlour + 'g';
-            resWater.textContent = mainWater + 'g';
-            resSalt.textContent = totalSalt + 'g';
-            resYeast.textContent = mainYeast + 'g';
-            totalWeightDisplay.textContent = totalDoughWeight.toFixed(0) + 'g';
-
-            // Update Schedule Dynamic Logic
-            const now = new Date();
-            let steps = [];
-            
-            if (useBiga) {
-                const bigaTime = new Date(now);
-                const mainMixTime = new Date(now.getTime() + 12 * 3600000); // 12 hours later
-                const foldTime = new Date(mainMixTime.getTime() + 30 * 60000);
-                const bakeTime = new Date(mainMixTime.getTime() + hours * 3600000);
-                const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
-
-                steps = [
-                    { 
-                        title: { it: "Preparazione Biga", en: "Mix Biga" }, 
-                        desc: { it: "Impasta la Biga. Lascia a temperatura ambiente.", en: "Mix the preferment. Rest at room temp." }, 
-                        time: bigaTime, date: bigaTime, color: "orange-600" 
-                    },
-                    { 
-                        title: { it: "Impasto Principale", en: "Main Dough" }, 
-                        desc: { it: "Aggiungi gli ingredienti rimanenti.", en: "Add remaining ingredients to the Biga." }, 
-                        time: mainMixTime, date: mainMixTime, color: "orange-500" 
-                    },
-                    { 
-                        title: { it: "Primo Set di Pieghe", en: "First Fold" }, 
-                        desc: { it: "Rafforza la maglia glutinica.", en: "Strengthen the dough structure." }, 
-                        time: foldTime, date: foldTime, color: "orange-300" 
-                    },
-                    { 
-                        title: { it: "Infornare", en: "Bake" }, 
-                        desc: { it: "Forno a 450°F (preriscalda la pentola!).", en: "450°F oven (preheat Dutch oven!)." }, 
-                        time: bakeTime, date: bakeTime, color: "stone-800", text: "white" 
-                    },
-                    { 
-                        title: { it: "Pronto da Mangiare", en: "Ready to Eat" }, 
-                        desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" }, 
-                        time: coolingTime, date: coolingTime, color: "green-400", text: "green-800" 
-                    }
-                ];
-            } else {
-                const start = new Date(now);
-                const fold1 = new Date(now.getTime() + 30 * 60000);
-                const bakeTime = new Date(now.getTime() + hours * 3600000);
-                const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
-
-                steps = [
-                    { 
-                        title: { it: "Impasto Iniziale", en: "Initial Mix" }, 
-                        desc: { it: "Mischia farina, acqua, lievito e sale.", en: "Mix flour, water, yeast, and salt." }, 
-                        time: start, date: start, color: "orange-500" 
-                    },
-                    { 
-                        title: { it: "Primo Set di Pieghe", en: "First Fold" }, 
-                        desc: { it: "Rafforza l'impasto.", en: "Strengthen the dough." }, 
-                        time: fold1, date: fold1, color: "orange-300" 
-                    },
-                    { 
-                        title: { it: "Infornare", en: "Bake" }, 
-                        desc: { it: "Preriscalda la pentola 30 min prima.", en: "Preheat Dutch oven 30 mins before this." }, 
-                        time: bakeTime, date: bakeTime, color: "stone-800", text: "white" 
-                    },
-                    { 
-                        title: { it: "Pronto da Mangiare", en: "Ready to Eat" }, 
-                        desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" }, 
-                        time: coolingTime, date: coolingTime, color: "green-400", text: "green-800" 
-                    }
-                ];
-            }
-
-            scheduleContainer.innerHTML = steps.map(s => `
-                <div class="flex items-center justify-between border-l-2 border-${s.color} pl-3">
-                    <div>
-                        <p class="font-bold text-gray-800">${s.title[currentLang]}</p>
-                        <p class="text-gray-500 text-[10px]">${s.desc[currentLang]}</p>
-                    </div>
-                    <div class="text-right flex flex-col items-end">
-                        <span class="${s.text ? `text-${s.text}` : 'text-gray-700'} ${s.text === 'white' ? `bg-${s.color} px-2 py-0.5 rounded shadow-sm` : ''} font-bold">${formatTime(s.time)}</span>
-                        ${useBiga ? `<span class="text-[9px] text-gray-400 mt-0.5">${formatDateString(s.date)}</span>` : ''}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function handleBreadTypeChange(e) {
-            if (e.target.id === 'typePizza') {
-                // 150g flour yields ~247g total dough mass, perfect for a single pizza
-                flourRange.value = 150; 
-            } else if (e.target.id !== 'typePizza' && parseInt(flourRange.value) < 250) {
-                // If switching back to a standard bread type from a small pizza, reset to normal loaf
-                flourRange.value = 500;
-            }
-            updateRecipe();
-        }
-
-        flourRange.addEventListener('input', updateRecipe);
-        loafRange.addEventListener('input', updateRecipe);
-        timeRange.addEventListener('input', updateRecipe);
-        tempRange.addEventListener('input', updateRecipe);
-        bigaToggle.addEventListener('change', updateRecipe);
-        breadTypeInputs.forEach(input => input.addEventListener('change', handleBreadTypeChange));
-        
-        // Initial run
-        updateRecipe();
-    </script>
+    <script type="module" src="./js/app.js"></script>
 </body>
 </html>
