@@ -72,9 +72,6 @@ export function generateSchedule(inputs, currentLang) {
     } else if (useBiga) {
         const bigaTime = new Date(now);
         const mainMixTime = new Date(now.getTime() + 12 * 3600000);
-        const foldTime = new Date(mainMixTime.getTime() + 30 * 60000);
-        const bakeTime = new Date(mainMixTime.getTime() + hours * 3600000);
-        const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
 
         steps = [
             {
@@ -87,27 +84,10 @@ export function generateSchedule(inputs, currentLang) {
                 desc: { it: "Aggiungi gli ingredienti rimanenti.", en: "Add remaining ingredients to the Biga." },
                 time: mainMixTime, date: mainMixTime, color: "orange-500"
             },
-            {
-                title: { it: "Primo Set di Pieghe", en: "First Fold" },
-                desc: { it: "Rafforza la maglia glutinica.", en: "Strengthen the dough structure." },
-                time: foldTime, date: foldTime, color: "orange-300"
-            },
-            {
-                title: { it: "Infornare", en: "Bake" },
-                desc: { it: "Forno a 450°F (preriscalda la pentola!).", en: "450°F oven (preheat Dutch oven!)." },
-                time: bakeTime, date: bakeTime, color: "stone-800", text: "white"
-            },
-            {
-                title: { it: "Pronto da Mangiare", en: "Ready to Eat" },
-                desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" },
-                time: coolingTime, date: coolingTime, color: "green-400", text: "green-800"
-            }
+            ...generateCommonSteps(mainMixTime, hours, true)
         ];
     } else {
         const start = new Date(now);
-        const fold1 = new Date(now.getTime() + 30 * 60000);
-        const bakeTime = new Date(now.getTime() + hours * 3600000);
-        const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
 
         steps = [
             {
@@ -115,23 +95,39 @@ export function generateSchedule(inputs, currentLang) {
                 desc: { it: "Mischia farina, acqua, lievito e sale.", en: "Mix flour, water, yeast, and salt." },
                 time: start, date: start, color: "orange-500"
             },
-            {
-                title: { it: "Primo Set di Pieghe", en: "First Fold" },
-                desc: { it: "Rafforza l'impasto.", en: "Strengthen the dough." },
-                time: fold1, date: fold1, color: "orange-300"
-            },
-            {
-                title: { it: "Infornare", en: "Bake" },
-                desc: { it: "Preriscalda la pentola 30 min prima.", en: "Preheat Dutch oven 30 mins before this." },
-                time: bakeTime, date: bakeTime, color: "stone-800", text: "white"
-            },
-            {
-                title: { it: "Pronto da Mangiare", en: "Ready to Eat" },
-                desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" },
-                time: coolingTime, date: coolingTime, color: "green-400", text: "green-800"
-            }
+            ...generateCommonSteps(start, hours, false)
         ];
     }
 
     return steps;
+}
+
+function generateCommonSteps(baseTime, hours, isBiga) {
+    const foldTime = new Date(baseTime.getTime() + 30 * 60000);
+    const bakeTime = new Date(baseTime.getTime() + hours * 3600000);
+    const coolingTime = new Date(bakeTime.getTime() + 45 * 60000);
+
+    return [
+        {
+            title: { it: "Primo Set di Pieghe", en: "First Fold" },
+            desc: {
+                it: isBiga ? "Rafforza la maglia glutinica." : "Rafforza l'impasto.",
+                en: isBiga ? "Strengthen the dough structure." : "Strengthen the dough."
+            },
+            time: foldTime, date: foldTime, color: "orange-300"
+        },
+        {
+            title: { it: "Infornare", en: "Bake" },
+            desc: {
+                it: isBiga ? "Forno a 450°F (preriscalda la pentola!)." : "Preriscalda la pentola 30 min prima.",
+                en: isBiga ? "450°F oven (preheat Dutch oven!)." : "Preheat Dutch oven 30 mins before this."
+            },
+            time: bakeTime, date: bakeTime, color: "stone-800", text: "white"
+        },
+        {
+            title: { it: "Pronto da Mangiare", en: "Ready to Eat" },
+            desc: { it: "Raffreddamento completato. Taglia!", en: "Cooling complete. Slice it!" },
+            time: coolingTime, date: coolingTime, color: "green-400", text: "green-800"
+        }
+    ];
 }
