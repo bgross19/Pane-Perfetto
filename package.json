@@ -1,0 +1,24 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sw.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgross19/Pane-Perfetto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/bgross19/Pane-Perfetto/issues"
+  },
+  "homepage": "https://github.com/bgross19/Pane-Perfetto#readme",
+  "devDependencies": {
+    "jest": "^30.4.2"
+  }
+}
