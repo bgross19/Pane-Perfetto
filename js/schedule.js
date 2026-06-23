@@ -1,9 +1,14 @@
+const timeFormatterIt = new Intl.DateTimeFormat('it-IT', { hour: '2-digit', minute: '2-digit' });
+const timeFormatterEn = new Intl.DateTimeFormat('en-US', { hour: '2-digit', minute: '2-digit' });
+const dateFormatterIt = new Intl.DateTimeFormat('it-IT', { weekday: 'short', month: 'short', day: 'numeric' });
+const dateFormatterEn = new Intl.DateTimeFormat('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
 export function formatTime(date, currentLang) {
-    return date.toLocaleTimeString(currentLang === 'it' ? 'it-IT' : 'en-US', { hour: '2-digit', minute: '2-digit' });
+    return (currentLang === 'it' ? timeFormatterIt : timeFormatterEn).format(date);
 }
 
 export function formatDateString(date, currentLang) {
-    return date.toLocaleDateString(currentLang === 'it' ? 'it-IT' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return (currentLang === 'it' ? dateFormatterIt : dateFormatterEn).format(date);
 }
 
 export function generateSchedule(inputs, currentLang) {
