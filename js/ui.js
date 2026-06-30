@@ -3,6 +3,60 @@ import { generateSchedule, formatTime, formatDateString } from './schedule.js';
 
 let currentLang = 'it';
 
+// Cache DOM elements
+let domCache = null;
+
+function initDOMCache() {
+    if (domCache) return;
+
+    domCache = {
+        flourRange: document.getElementById('flourRange'),
+        loafRange: document.getElementById('loafRange'),
+        timeRange: document.getElementById('timeRange'),
+        tempRange: document.getElementById('tempRange'),
+        breadTypeInputs: document.getElementsByName('breadType'),
+        bigaToggle: document.getElementById('bigaToggle'),
+        startTimeInput: document.getElementById('startTime'),
+        timeRangeParent: document.getElementById('timeRange').parentElement,
+        startTimeContainer: document.getElementById('startTimeContainer'),
+
+        flourDisplay: document.getElementById('flourValue'),
+        loafDisplay: document.getElementById('loafValue'),
+        timeDisplay: document.getElementById('timeValue'),
+        tempDisplay: document.getElementById('tempValue'),
+        labelWater: document.getElementById('labelWater'),
+        totalWeightDisplay: document.getElementById('totalWeight'),
+
+        bigaSection: document.getElementById('bigaSection'),
+        mainDoughTitle: document.getElementById('mainDoughTitle'),
+        ricettaTitle: document.getElementById('ricettaTitle'),
+        labelMainFlour: document.getElementById('labelMainFlour'),
+        labelMainYeast: document.getElementById('labelMainYeast'),
+
+        resBigaFlour: document.getElementById('resBigaFlour'),
+        resBigaWater: document.getElementById('resBigaWater'),
+        resBigaYeast: document.getElementById('resBigaYeast'),
+
+        resFlour: document.getElementById('resFlour'),
+        resWater: document.getElementById('resWater'),
+        resSalt: document.getElementById('resSalt'),
+        resYeast: document.getElementById('resYeast'),
+        resYeastParent: document.getElementById('resYeast').parentElement,
+
+        sourdoughStarterRow: document.getElementById('sourdoughStarterRow'),
+        resSourdoughStarter: document.getElementById('resSourdoughStarter'),
+
+        barFlour: document.getElementById('barFlour'),
+        barWater: document.getElementById('barWater'),
+        barSalt: document.getElementById('barSalt'),
+        barYeast: document.getElementById('barYeast'),
+        lblFlourVisual: document.getElementById('lblFlourVisual'),
+        lblHydrationVisual: document.getElementById('lblHydrationVisual'),
+
+        scheduleContainer: document.getElementById('scheduleContainer')
+    };
+}
+
 export function getLanguage() {
     return currentLang;
 }
@@ -12,13 +66,8 @@ export function setLanguage(lang) {
 }
 
 export function updateUI() {
-    const flourRange = document.getElementById('flourRange');
-    const loafRange = document.getElementById('loafRange');
-    const timeRange = document.getElementById('timeRange');
-    const tempRange = document.getElementById('tempRange');
-    const breadTypeInputs = document.getElementsByName('breadType');
-    const bigaToggle = document.getElementById('bigaToggle');
-    const startTimeInput = document.getElementById('startTime');
+    initDOMCache();
+    const { flourRange, loafRange, timeRange, tempRange, breadTypeInputs, bigaToggle, startTimeInput, timeRangeParent, startTimeContainer } = domCache;
 
     let hydration = 0.65;
     let isSourdough = false;
@@ -47,12 +96,12 @@ export function updateUI() {
         bigaToggle.checked = false;
         bigaToggle.disabled = true;
         inputs.useBiga = false;
-        document.getElementById('timeRange').parentElement.classList.add('hidden');
-        document.getElementById('startTimeContainer').classList.add('hidden');
+        timeRangeParent.classList.add('hidden');
+        startTimeContainer.classList.add('hidden');
     } else {
         bigaToggle.disabled = false;
-        document.getElementById('timeRange').parentElement.classList.remove('hidden');
-        document.getElementById('startTimeContainer').classList.remove('hidden');
+        timeRangeParent.classList.remove('hidden');
+        startTimeContainer.classList.remove('hidden');
     }
 
     const recipe = calculateRecipe(inputs);
@@ -63,40 +112,18 @@ export function updateUI() {
 }
 
 function updateRecipeDisplay(recipe, inputs) {
+    initDOMCache();
     const { totalFlour, totalWater, totalSalt, totalYeast, mainFlour, mainWater, mainYeast, bigaFlour, bigaWater, bigaYeast, sourdoughStarter, totalDoughWeight } = recipe;
     const { baseFlour, loaves, hours, temp, useBiga, hydration, isSourdough } = inputs;
 
-    const flourDisplay = document.getElementById('flourValue');
-    const loafDisplay = document.getElementById('loafValue');
-    const timeDisplay = document.getElementById('timeValue');
-    const tempDisplay = document.getElementById('tempValue');
-    const labelWater = document.getElementById('labelWater');
-    const totalWeightDisplay = document.getElementById('totalWeight');
-
-    const bigaSection = document.getElementById('bigaSection');
-    const mainDoughTitle = document.getElementById('mainDoughTitle');
-    const ricettaTitle = document.getElementById('ricettaTitle');
-    const labelMainFlour = document.getElementById('labelMainFlour');
-    const labelMainYeast = document.getElementById('labelMainYeast');
-
-    const resBigaFlour = document.getElementById('resBigaFlour');
-    const resBigaWater = document.getElementById('resBigaWater');
-    const resBigaYeast = document.getElementById('resBigaYeast');
-
-    const resFlour = document.getElementById('resFlour');
-    const resWater = document.getElementById('resWater');
-    const resSalt = document.getElementById('resSalt');
-    const resYeast = document.getElementById('resYeast');
-
-    const sourdoughStarterRow = document.getElementById('sourdoughStarterRow');
-    const resSourdoughStarter = document.getElementById('resSourdoughStarter');
-
-    const barFlour = document.getElementById('barFlour');
-    const barWater = document.getElementById('barWater');
-    const barSalt = document.getElementById('barSalt');
-    const barYeast = document.getElementById('barYeast');
-    const lblFlourVisual = document.getElementById('lblFlourVisual');
-    const lblHydrationVisual = document.getElementById('lblHydrationVisual');
+    const {
+        flourDisplay, loafDisplay, timeDisplay, tempDisplay, labelWater, totalWeightDisplay,
+        bigaSection, mainDoughTitle, ricettaTitle, labelMainFlour, labelMainYeast,
+        resBigaFlour, resBigaWater, resBigaYeast,
+        resFlour, resWater, resSalt, resYeast, resYeastParent,
+        sourdoughStarterRow, resSourdoughStarter,
+        barFlour, barWater, barSalt, barYeast, lblFlourVisual, lblHydrationVisual
+    } = domCache;
 
     if (useBiga) {
         resBigaFlour.textContent = bigaFlour + 'g';
@@ -128,10 +155,10 @@ function updateRecipeDisplay(recipe, inputs) {
         sourdoughStarterRow.classList.remove('hidden');
         resSourdoughStarter.textContent = sourdoughStarter + 'g';
         // Hide dry yeast
-        document.getElementById('resYeast').parentElement.classList.add('hidden');
+        resYeastParent.classList.add('hidden');
     } else {
         sourdoughStarterRow.classList.add('hidden');
-        document.getElementById('resYeast').parentElement.classList.remove('hidden');
+        resYeastParent.classList.remove('hidden');
     }
 
     // Mass Composition Visualization calculation with sourdough
@@ -168,7 +195,8 @@ function updateRecipeDisplay(recipe, inputs) {
 }
 
 function updateScheduleDisplay(steps, useBiga, isSourdough) {
-    const scheduleContainer = document.getElementById('scheduleContainer');
+    initDOMCache();
+    const { scheduleContainer } = domCache;
     scheduleContainer.innerHTML = steps.map(s => `
         <div class="flex items-center justify-between border-l-2 border-${s.color} pl-3">
             <div>
