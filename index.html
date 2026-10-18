@@ -3,317 +3,1413 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#c2410c">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
-    <title>Pane Perfetto - Calcolatore Avanzato</title>
+    <meta name="theme-color" content="#9a3412">
+    <title>Pane Perfetto 4.0 — Calcolatore Artigianale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Inter:wght@400;500;600&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+        :root {
+            --bg-cream: #faf6f0;
+            --ink-dark: #261e18;
+            --terracotta: #b43e14;
+            --terracotta-dark: #7c2d12;
+            --wheat: #e6ccb2;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fdfbf7;
-            color: #2d241e;
+            background-color: var(--bg-cream);
+            color: var(--ink-dark);
+            background-image: radial-gradient( rgba(180, 62, 20, 0.04) 1px, transparent 0 );
+            background-size: 24px 24px;
         }
-        h1, h2, h3 {
-            font-family: 'Playfair Display', serif;
+
+        h1, h2, h3, .serif-font {
+            font-family: 'Cormorant Garamond', Georgia, serif;
         }
+
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         .card {
-            background: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            border-radius: 1.25rem;
+            border: 1px solid rgba(230, 204, 178, 0.65);
+            box-shadow: 0 10px 30px -10px rgba(38, 30, 24, 0.06), 0 4px 10px -4px rgba(38, 30, 24, 0.03);
         }
+
         input[type="range"] {
-            accent-color: #c2410c;
+            accent-color: var(--terracotta);
+            height: 6px;
+            border-radius: 999px;
+            background: #e7e0d6;
+            cursor: pointer;
         }
-        .ingredient-row {
-            border-bottom: 1px solid #f3f4f6;
+
+        .style-card {
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .ingredient-row:last-child {
-            border-bottom: none;
+        .style-card.active {
+            background: linear-gradient(135deg, #9a3412 0%, #c2410c 100%);
+            color: #ffffff;
+            border-color: #7c2d12;
+            box-shadow: 0 8px 20px -6px rgba(194, 65, 12, 0.45);
+            transform: translateY(-1px);
         }
-        input[type="radio"]:checked + label {
-            background-color: #c2410c;
+        .style-card.active .style-sub {
+            color: #ffedd5;
+        }
+
+        .pill-btn.active {
+            background-color: #9a3412;
             color: white;
-            border-color: #c2410c;
+            border-color: #9a3412;
         }
-        .toggle-checkbox:checked {
-            right: 0;
-            border-color: #c2410c;
-        }
-        .toggle-checkbox:checked + .toggle-label {
-            background-color: #c2410c;
-        }
-        /* Language Toggle Classes */
+
+        /* Language visibility rules */
         body.lang-en .lang-it { display: none !important; }
         body.lang-it .lang-en { display: none !important; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+        }
     </style>
 </head>
-<body class="min-h-screen text-sm md:text-base lang-it pb-8">
-    <nav class="sticky top-0 z-30 bg-[#fdfbf7]/95 backdrop-blur-md border-b border-orange-100 px-4 py-3 md:px-8 md:py-4 mb-6 flex justify-between items-center shadow-sm">
-        <div>
-            <h1 class="text-2xl md:text-3xl font-bold text-orange-900 leading-none">Pane Perfetto</h1>
-            <p class="text-[11px] md:text-xs text-orange-700 italic mt-1.5">
-                <span class="lang-it">Analisi e Arte della Panificazione</span>
-                <span class="lang-en">Baking Analysis & Art</span>
-            </p>
-        </div>
-        
-        <div class="flex items-center gap-2 text-xs md:text-sm font-medium bg-white px-3 py-1.5 rounded-full shadow-sm border border-orange-100 shrink-0">
-            <button id="btnIt" class="text-orange-900 font-bold transition-colors">IT</button>
-            <span class="text-gray-300">|</span>
-            <button id="btnEn" class="text-gray-400 hover:text-orange-900 transition-colors">EN</button>
+<body class="min-h-screen lang-it pb-16 text-stone-800 selection:bg-orange-200">
+
+    <!-- Sticky Header -->
+    <nav class="sticky top-0 z-40 bg-[#faf6f0]/95 backdrop-blur-md border-b border-orange-200/70 px-4 py-3 md:px-8 shadow-sm">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-800 text-amber-50 flex items-center justify-center text-xl shadow-inner font-bold serif-font">
+                    P
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-2xl md:text-3xl font-bold text-orange-950 tracking-tight leading-none">Pane Perfetto</h1>
+                        <span class="text-[10px] font-semibold uppercase tracking-widest px-2 py-0.5 bg-orange-100 text-orange-900 rounded-full border border-orange-200">v4.0</span>
+                    </div>
+                    <p class="text-xs text-orange-800/80 italic mt-0.5">
+                        <span class="lang-it">Architettura e Calcolo dei 4 Stili Classici Italiani</span>
+                        <span class="lang-en">Architecture & Math of the 4 Classic Italian Styles</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2.5 no-print">
+                <button id="btnCopyRecipe" class="hidden sm:flex items-center gap-1.5 text-xs font-medium bg-white hover:bg-orange-50 text-stone-700 px-3 py-1.5 rounded-full border border-stone-200 shadow-sm transition">
+                    <span>📋</span>
+                    <span class="lang-it">Copia Ricetta</span>
+                    <span class="lang-en">Copy Recipe</span>
+                </button>
+                <div class="flex items-center bg-white p-1 rounded-full shadow-sm border border-orange-200/80 text-xs font-semibold">
+                    <button id="btnIt" class="px-2.5 py-1 rounded-full bg-orange-800 text-white transition-all">IT</button>
+                    <button id="btnEn" class="px-2.5 py-1 rounded-full text-stone-500 hover:text-orange-900 transition-all">EN</button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-xl mx-auto px-4 md:px-0">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="space-y-6">
-                <div class="card p-5">
-                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                        <span>🥖</span> 
-                        <span class="lang-it">Tipo di Pane</span>
-                        <span class="lang-en">Bread Type</span>
+    <main class="max-w-5xl mx-auto px-4 mt-6 space-y-6">
+
+        <!-- Section 1: The 4 Core Italian Styles -->
+        <section class="card p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-orange-950 flex items-center gap-2">
+                        <span>🥖</span>
+                        <span class="lang-it">I Quattro Stili Fondamentali</span>
+                        <span class="lang-en">The Four Core Italian Styles</span>
                     </h2>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="radio" id="typeClassico" name="breadType" value="0.65" class="hidden" checked>
-                        <label for="typeClassico" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Classico (65%)</label>
-                        
-                        <input type="radio" id="typeCiabatta" name="breadType" value="0.80" class="hidden">
-                        <label for="typeCiabatta" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Ciabatta (80%)</label>
-                        
-                        <input type="radio" id="typeFocaccia" name="breadType" value="0.75" class="hidden">
-                        <label for="typeFocaccia" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Focaccia (75%)</label>
-                        
-                        <input type="radio" id="typePizza" name="breadType" value="0.62" class="hidden">
-                        <label for="typePizza" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium">Pizza (62%)</label>
-
-                        <input type="radio" id="typeSourdough" name="breadType" value="0.70" class="hidden">
-                        <label for="typeSourdough" class="block text-center py-2 border rounded-xl cursor-pointer hover:bg-orange-50 text-xs font-medium col-span-2">Sourdough / Lievito Madre (70%)</label>
-                    </div>
+                    <p class="text-xs text-stone-500">
+                        <span class="lang-it">Seleziona uno stile per calibrare idratazione, pezzatura, grassi e metodo di cottura</span>
+                        <span class="lang-en">Select a style to calibrate hydration, unit weight, fats, and thermal profile</span>
+                    </p>
                 </div>
-
-                <div class="card p-5">
-                    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <span>⚖️</span> 
-                        <span class="lang-it">Parametri</span>
-                        <span class="lang-en">Parameters</span>
-                    </h2>
-                    
-                    <div class="mb-5">
-                        <div class="flex justify-between mb-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase">
-                                <span class="lang-it">Farina per pagnotta (g)</span>
-                                <span class="lang-en">Flour per unit (g)</span>
-                            </label>
-                            <span id="flourValue" class="font-bold text-orange-700">500g</span>
-                        </div>
-                        <input type="range" id="flourRange" min="100" max="1000" step="10" value="500" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-
-                    <div class="mb-5">
-                        <div class="flex justify-between mb-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase">
-                                <span class="lang-it">Numero di Pagnotte</span>
-                                <span class="lang-en">Number of Units</span>
-                            </label>
-                            <span id="loafValue" class="font-bold text-orange-700">1</span>
-                        </div>
-                        <input type="range" id="loafRange" min="1" max="10" step="1" value="1" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-
-                    <div class="mb-5">
-                        <div class="flex justify-between mb-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase">
-                                <span class="lang-it">Lievitazione (ore)</span>
-                                <span class="lang-en">Proofing Time (hrs)</span>
-                            </label>
-                            <span id="timeValue" class="font-bold text-orange-700">4</span>
-                        </div>
-                        <input type="range" id="timeRange" min="2" max="24" step="1" value="4" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase">
-                                <span class="lang-it">Temperatura (°F)</span>
-                                <span class="lang-en">Temperature (°F)</span>
-                            </label>
-                            <span id="tempValue" class="font-bold text-orange-700">72°F</span>
-                        </div>
-                        <input type="range" id="tempRange" min="60" max="90" step="1" value="72" class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
-                    </div>
-
-                    <div class="mb-4" id="startTimeContainer">
-                        <div class="flex justify-between mb-1">
-                            <label class="text-xs font-medium text-gray-500 uppercase" for="startTime">
-                                <span class="lang-it">Orario di Inizio</span>
-                                <span class="lang-en">Start Time</span>
-                            </label>
-                        </div>
-                        <input type="datetime-local" id="startTime" class="w-full p-1.5 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-700 cursor-pointer">
-                    </div>
-
-                    <div class="flex items-center justify-between p-3 bg-stone-50 rounded-xl border border-stone-200 mt-4">
-                        <div class="flex items-center gap-2">
-                            <span class="text-lg">🥣</span>
-                            <div>
-                                <p class="text-xs font-bold text-stone-800">
-                                    <span class="lang-it">Usa Biga (Prefermento)</span>
-                                    <span class="lang-en">Use Biga (Pre-ferment)</span>
-                                </p>
-                                <p class="text-[10px] text-stone-500">
-                                    <span class="lang-it">Migliora aroma e alveoli</span>
-                                    <span class="lang-en">Improves aroma & crumb</span>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                            <input type="checkbox" id="bigaToggle" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer outline-none"/>
-                            <label for="bigaToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
-                        </div>
-                    </div>
-                </div>
+                <button id="btnResetStyle" class="self-start sm:self-auto text-xs text-orange-800 hover:text-orange-950 underline font-medium no-print">
+                    <span class="lang-it">Ripristina valori standard dello stile</span>
+                    <span class="lang-en">Reset to style defaults</span>
+                </button>
             </div>
 
-            <div class="space-y-6">
-                <div class="card p-5 border-2 border-orange-100">
-                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2" id="ricettaTitle">
-                        <span>📝</span> <span class="lang-it">Ricetta Totale</span><span class="lang-en">Total Recipe</span>
-                    </h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3" id="styleGrid">
+                <!-- Style 1: Classico -->
+                <button data-style="classico" class="style-card active text-left p-3.5 rounded-2xl border border-stone-200 bg-stone-50/70 hover:border-orange-300">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-lg">🍞</span>
+                        <span class="mono-font text-xs font-semibold px-2 py-0.5 rounded-md bg-black/10">65% H₂O</span>
+                    </div>
+                    <div class="font-bold text-base leading-snug">Pane Classico</div>
+                    <div class="style-sub text-[11px] text-stone-500 mt-0.5">
+                        <span class="lang-it">Filone / Pagnotta in Ghisa</span>
+                        <span class="lang-en">Artisan Loaf / Dutch Oven</span>
+                    </div>
+                </button>
 
-                    <div class="mb-4 bg-orange-50/50 p-2 rounded-lg border border-orange-100">
-                        <div class="flex justify-between text-[10px] font-bold text-orange-900/60 mb-1 uppercase tracking-wider">
-                            <span class="lang-it">Composizione Massa (100% Totale)</span><span class="lang-en">Mass Composition (100% Total)</span>
+                <!-- Style 2: Ciabatta -->
+                <button data-style="ciabatta" class="style-card text-left p-3.5 rounded-2xl border border-stone-200 bg-stone-50/70 hover:border-orange-300">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-lg">🥖</span>
+                        <span class="mono-font text-xs font-semibold px-2 py-0.5 rounded-md bg-black/10">80% H₂O</span>
+                    </div>
+                    <div class="font-bold text-base leading-snug">Ciabatta</div>
+                    <div class="style-sub text-[11px] text-stone-500 mt-0.5">
+                        <span class="lang-it">Alta idratazione, grandi alveoli</span>
+                        <span class="lang-en">High hydration, open crumb</span>
+                    </div>
+                </button>
+
+                <!-- Style 3: Focaccia -->
+                <button data-style="focaccia" class="style-card text-left p-3.5 rounded-2xl border border-stone-200 bg-stone-50/70 hover:border-orange-300">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-lg">🫒</span>
+                        <span class="mono-font text-xs font-semibold px-2 py-0.5 rounded-md bg-black/10">75% H₂O</span>
+                    </div>
+                    <div class="font-bold text-base leading-snug">Focaccia</div>
+                    <div class="style-sub text-[11px] text-stone-500 mt-0.5">
+                        <span class="lang-it">Con Olio EVO &amp; Salamoia</span>
+                        <span class="lang-en">With EVOO &amp; Brine Emulsion</span>
+                    </div>
+                </button>
+
+                <!-- Style 4: Pizza -->
+                <button data-style="pizza" class="style-card text-left p-3.5 rounded-2xl border border-stone-200 bg-stone-50/70 hover:border-orange-300">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-lg">🍕</span>
+                        <span class="mono-font text-xs font-semibold px-2 py-0.5 rounded-md bg-black/10">62% H₂O</span>
+                    </div>
+                    <div class="font-bold text-base leading-snug">Pizza</div>
+                    <div class="style-sub text-[11px] text-stone-500 mt-0.5">
+                        <span class="lang-it">Panetti da ~260g, alta temp.</span>
+                        <span class="lang-en">~260g dough balls, high heat</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Dynamic Style Profile Banner -->
+            <div class="mt-4 p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+                <div class="space-y-0.5">
+                    <div class="font-bold text-orange-950 uppercase tracking-wider text-[11px]" id="styleBannerTitle">Profilo Tecnico • Pane Classico</div>
+                    <p class="text-stone-700 leading-relaxed" id="styleBannerDesc"></p>
+                </div>
+                <div class="flex flex-wrap gap-2 shrink-0">
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-amber-200 font-medium text-stone-700" id="badgeFlourRec">Farina: Tipo 0 (W260–280)</span>
+                    <span class="px-2.5 py-1 rounded-lg bg-white border border-amber-200 font-medium text-orange-900" id="badgeBakeTemp">Cottura: 450°F (230°C)</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: Parameters & Fermentation Controls (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- Dough & Scaling Card -->
+                <div class="card p-5 space-y-5">
+                    <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                        <h2 class="text-xl font-bold text-orange-950 flex items-center gap-2">
+                            <span>⚖️</span>
+                            <span class="lang-it">Parametri Impasto</span>
+                            <span class="lang-en">Dough Parameters</span>
+                        </h2>
+                        <span class="text-xs font-medium text-stone-500 mono-font" id="unitWeightPreview">~837g / unità</span>
+                    </div>
+
+                    <!-- Sliders Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5">
+                        <!-- Flour per Unit -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase tracking-wide" for="flourRange">
+                                    <span class="lang-it" id="lblFlourUnitIt">Farina per Pagnotta</span>
+                                    <span class="lang-en" id="lblFlourUnitEn">Flour per Unit</span>
+                                </label>
+                                <span id="flourValue" class="mono-font font-bold text-sm text-orange-800">500g</span>
+                            </div>
+                            <input type="range" id="flourRange" min="100" max="1000" step="10" value="500" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>100g (Panino/Pizza)</span>
+                                <span>500g (Classico)</span>
+                                <span>1000g</span>
+                            </div>
                         </div>
-                        <div class="w-full h-2.5 flex rounded-full overflow-hidden bg-gray-100">
-                            <div id="barFlour" class="bg-amber-200 transition-all duration-300" style="width: 50%" title="Flour"></div>
-                            <div id="barWater" class="bg-blue-300 transition-all duration-300" style="width: 35%" title="Water"></div>
-                            <div id="barSalt" class="bg-gray-400 transition-all duration-300" style="width: 5%" title="Salt"></div>
-                            <div id="barYeast" class="bg-orange-600 transition-all duration-300" style="width: 10%" title="Yeast"></div>
+
+                        <!-- Number of Units -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase tracking-wide" for="loafRange">
+                                    <span class="lang-it" id="lblUnitsIt">Numero di Pagnotte</span>
+                                    <span class="lang-en" id="lblUnitsEn">Number of Units</span>
+                                </label>
+                                <span id="loafValue" class="mono-font font-bold text-sm text-orange-800">1</span>
+                            </div>
+                            <input type="range" id="loafRange" min="1" max="12" step="1" value="1" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>1</span>
+                                <span>4</span>
+                                <span>8</span>
+                                <span>12</span>
+                            </div>
                         </div>
-                        <div class="flex justify-between text-[9px] text-gray-500 mt-1 px-1">
-                            <span id="lblFlourVisual">Farina</span>
-                            <span id="lblHydrationVisual">Acqua</span>
+
+                        <!-- Hydration % -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase tracking-wide" for="hydrationRange">
+                                    <span class="lang-it">Idratazione (%)</span>
+                                    <span class="lang-en">Hydration (%)</span>
+                                </label>
+                                <span id="hydrationValue" class="mono-font font-bold text-sm text-blue-700">65%</span>
+                            </div>
+                            <input type="range" id="hydrationRange" min="55" max="90" step="1" value="65" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>55% (Compatto)</span>
+                                <span>70%</span>
+                                <span>90% (Estremo)</span>
+                            </div>
+                        </div>
+
+                        <!-- Olive Oil (Olio EVO) % -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase tracking-wide" for="oilRange">
+                                    <span class="lang-it">Olio EVO (%)</span>
+                                    <span class="lang-en">Extra Virgin Olive Oil (%)</span>
+                                </label>
+                                <span id="oilValue" class="mono-font font-bold text-sm text-amber-700">0%</span>
+                            </div>
+                            <input type="range" id="oilRange" min="0" max="10" step="0.5" value="0" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>0% (Puro)</span>
+                                <span>3% (Dorato)</span>
+                                <span>6%+ (Focaccia)</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div id="bigaSection" class="hidden mb-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                        <h3 class="text-sm font-bold text-orange-900 mb-2">
-                            <span class="lang-it">1. Biga (Preparare 12-16h prima)</span>
-                            <span class="lang-en">1. Biga (Mix 12-16h prior)</span>
-                        </h3>
-                        <div class="space-y-1 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600 italic">
-                                    <span class="lang-it">Farina (30% del tot.)</span><span class="lang-en">Flour (30% of total)</span>
-                                </span>
-                                <span class="font-bold" id="resBigaFlour">-</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600 italic">
-                                    <span class="lang-it">Acqua (45% idrat.)</span><span class="lang-en">Water (45% hydrat.)</span>
-                                </span>
-                                <span class="font-bold" id="resBigaWater">-</span>
-                            </div>
-                            <div class="flex justify-between text-orange-800">
-                                <span class="font-medium italic">
-                                    <span class="lang-it">Lievito</span><span class="lang-en">Yeast</span>
-                                </span>
-                                <span class="font-bold" id="resBigaYeast">-</span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
 
-                    <h3 class="text-sm font-bold text-stone-800 mb-2 hidden" id="mainDoughTitle">
-                        <span class="lang-it">2. Impasto Principale</span><span class="lang-en">2. Main Dough</span>
-                    </h3>
-                    <div class="space-y-2">
-                        <div class="ingredient-row flex justify-between py-1.5">
-                            <span class="text-gray-600 italic" id="labelMainFlour">Farina</span>
-                            <span class="font-bold" id="resFlour">500g</span>
-                        </div>
-                        <div class="ingredient-row flex justify-between py-1.5">
-                            <span class="text-gray-600 italic" id="labelWater">Acqua</span>
-                            <span class="font-bold" id="resWater">325g</span>
-                        </div>
-                        <div class="ingredient-row flex justify-between py-1.5">
-                            <span class="text-gray-600 italic">
-                                <span class="lang-it">Sale (2%)</span><span class="lang-en">Salt (2%)</span>
-                            </span>
-                            <span class="font-bold" id="resSalt">10g</span>
-                        </div>
-                        <div class="ingredient-row flex justify-between py-1.5 text-orange-800 bg-orange-50 px-2 rounded">
-                            <span class="font-medium italic" id="labelMainYeast">Lievito Secco</span>
-                            <span class="font-bold" id="resYeast">2.5g</span>
-                        </div>
-                        <div id="sourdoughStarterRow" class="hidden ingredient-row flex justify-between py-1.5 text-orange-800 bg-orange-50 px-2 rounded">
-                            <span class="font-medium italic">
-                                <span class="lang-it">Lievito Madre (100% idrat.)</span>
-                                <span class="lang-en">Sourdough Starter (100% hydrat.)</span>
-                            </span>
-                            <span class="font-bold" id="resSourdoughStarter">-</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-3 border-t border-dashed border-gray-200 flex justify-between items-center text-orange-900">
-                        <span class="text-xs font-bold uppercase tracking-wider">
-                            <span class="lang-it">Massa Totale</span><span class="lang-en">Total Dough Mass</span>
+                <!-- Biological Fermentation & Temperature Engine -->
+                <div class="card p-5 space-y-5">
+                    <div class="flex items-center justify-between border-b border-stone-100 pb-3">
+                        <h2 class="text-xl font-bold text-orange-950 flex items-center gap-2">
+                            <span>🌡️</span>
+                            <span class="lang-it">Motore di Fermentazione</span>
+                            <span class="lang-en">Fermentation &amp; Thermal Engine</span>
+                        </h2>
+                        <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-orange-50 text-orange-800 border border-orange-200 font-medium" id="fermentRateBadge">
+                            Attività Standard (1.00x)
                         </span>
-                        <span class="text-lg font-bold" id="totalWeight">847g</span>
+                    </div>
+
+                    <!-- Pre-ferment Selector (Diretto, Biga, Poolish) -->
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-600 uppercase tracking-wide mb-2">
+                            <span class="lang-it">Metodo di Panificazione (Prefermento)</span>
+                            <span class="lang-en">Fermentation Method (Pre-ferment)</span>
+                        </label>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <button type="button" data-pref="none" class="pref-btn pill-btn active py-2 px-3 rounded-xl border border-stone-200 text-xs font-semibold transition text-center">
+                                <div class="font-bold">
+                                    <span class="lang-it">Diretto</span>
+                                    <span class="lang-en">Direct Dough</span>
+                                </div>
+                                <div class="text-[10px] opacity-75">
+                                    <span class="lang-it">Unico impasto</span>
+                                    <span class="lang-en">Single mix</span>
+                                </div>
+                            </button>
+                            <button type="button" data-pref="biga" class="pref-btn pill-btn py-2 px-3 rounded-xl border border-stone-200 text-xs font-semibold transition text-center">
+                                <div class="font-bold">Biga (45%)</div>
+                                <div class="text-[10px] opacity-75">
+                                    <span class="lang-it">30% farina • 14h prima</span>
+                                    <span class="lang-en">30% flour • 14h prior</span>
+                                </div>
+                            </button>
+                            <button type="button" data-pref="poolish" class="pref-btn pill-btn py-2 px-3 rounded-xl border border-stone-200 text-xs font-semibold transition text-center">
+                                <div class="font-bold">Poolish (100%)</div>
+                                <div class="text-[10px] opacity-75">
+                                    <span class="lang-it">30% farina • 10h prima</span>
+                                    <span class="lang-en">30% flour • 10h prior</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                        <!-- Ambient Proofing Time -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase" for="timeRange">
+                                    <span class="lang-it">Lievitazione Amb.</span>
+                                    <span class="lang-en">Ambient Proof</span>
+                                </label>
+                                <span id="timeValue" class="mono-font font-bold text-sm text-orange-800">4h</span>
+                            </div>
+                            <input type="range" id="timeRange" min="2" max="24" step="1" value="4" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>2h</span>
+                                <span>8h</span>
+                                <span>24h</span>
+                            </div>
+                        </div>
+
+                        <!-- Cold Retard (Fridge 38°F) -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase" for="coldRange">
+                                    <span class="lang-it">Frigo (38°F/4°C)</span>
+                                    <span class="lang-en">Cold Retard</span>
+                                </label>
+                                <span id="coldValue" class="mono-font font-bold text-sm text-sky-700">0h</span>
+                            </div>
+                            <input type="range" id="coldRange" min="0" max="72" step="4" value="0" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>0h</span>
+                                <span>24h</span>
+                                <span>72h</span>
+                            </div>
+                        </div>
+
+                        <!-- Kitchen Temp (°F & °C) -->
+                        <div>
+                            <div class="flex justify-between items-baseline mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase" for="tempRange">
+                                    <span class="lang-it">Temp. Cucina</span>
+                                    <span class="lang-en">Kitchen Temp</span>
+                                </label>
+                                <span id="tempValue" class="mono-font font-bold text-sm text-orange-800">72°F (22.2°C)</span>
+                            </div>
+                            <input type="range" id="tempRange" min="60" max="90" step="1" value="72" class="w-full">
+                            <div class="flex justify-between text-[10px] text-stone-400 mt-1">
+                                <span>60°F</span>
+                                <span>75°F</span>
+                                <span>90°F</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Yeast Type & Timing Anchor Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-stone-100">
+                        <div>
+                            <label class="block text-xs font-semibold text-stone-600 uppercase mb-1.5" for="yeastTypeSelect">
+                                <span class="lang-it">Tipo di Lievito</span>
+                                <span class="lang-en">Yeast Type</span>
+                            </label>
+                            <select id="yeastTypeSelect" class="w-full p-2 text-xs font-medium border border-stone-300 rounded-xl bg-white text-stone-800 focus:outline-none focus:border-orange-700">
+                                <option value="idy">Lievito Secco Istantaneo / Instant Dry (IDY 100%)</option>
+                                <option value="ady">Lievito Secco Attivo / Active Dry (ADY ×1.25)</option>
+                                <option value="fresh">Lievito di Birra Fresco / Fresh Cake (×3.0)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <label class="text-xs font-semibold text-stone-600 uppercase" for="startTime">
+                                    <span class="lang-it" id="lblClockModeIt">Orario Inizio</span>
+                                    <span class="lang-en" id="lblClockModeEn">Start Time</span>
+                                </label>
+                                <button type="button" id="btnToggleScheduleMode" class="text-[11px] font-semibold text-orange-800 hover:underline">
+                                    <span class="lang-it">⇄ Calcola da Fine Cottura</span>
+                                    <span class="lang-en">⇄ Plan by Target Bake Time</span>
+                                </button>
+                            </div>
+                            <input type="datetime-local" id="startTime" class="w-full p-1.5 text-xs font-medium border border-stone-300 rounded-xl bg-white text-stone-800 focus:outline-none focus:border-orange-700">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Total Recipe & Baker's Math Breakdown (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+
+                <div class="card p-5 border-2 border-orange-200/80 relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-xl font-bold text-orange-950 flex items-center gap-2">
+                            <span>📝</span>
+                            <span class="lang-it" id="recipeHeaderIt">Ricetta Totale</span>
+                            <span class="lang-en" id="recipeHeaderEn">Total Formula</span>
+                        </h2>
+                        <span class="mono-font text-xs font-bold px-2.5 py-1 rounded-lg bg-orange-100 text-orange-900" id="totalWeightBadge">
+                            837g
+                        </span>
+                    </div>
+
+                    <!-- 100% Mass Composition Bar -->
+                    <div class="mb-4 bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+                        <div class="flex justify-between text-[10px] font-bold text-stone-500 mb-1.5 uppercase tracking-wider">
+                            <span class="lang-it">Composizione Massa (100% Totale)</span>
+                            <span class="lang-en">True Mass Composition (100% Total)</span>
+                            <span id="lblHydrationSummary" class="text-blue-700">65% Idrat.</span>
+                        </div>
+                        <div class="w-full h-3 flex rounded-full overflow-hidden bg-stone-200 shadow-inner">
+                            <div id="barFlour" class="bg-amber-300 transition-all duration-300" style="width: 59%"></div>
+                            <div id="barWater" class="bg-sky-400 transition-all duration-300" style="width: 38%"></div>
+                            <div id="barOil" class="bg-yellow-500 transition-all duration-300" style="width: 0%"></div>
+                            <div id="barSalt" class="bg-stone-400 transition-all duration-300" style="width: 2%"></div>
+                            <div id="barYeast" class="bg-orange-600 transition-all duration-300" style="width: 1%"></div>
+                        </div>
+                        <div class="flex flex-wrap justify-between gap-2 text-[10px] text-stone-600 mt-1.5 font-medium">
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-300 inline-block"></span> <span id="legendFlour">Farina 59.7%</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> <span id="legendWater">Acqua 38.8%</span></span>
+                            <span id="legendOilWrap" class="hidden items-center gap-1"><span class="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span> <span id="legendOil">Olio 0%</span></span>
+                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-stone-400 inline-block"></span> <span id="legendSalt">Sale 1.2%</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Stage 1: Pre-ferment Box (Biga or Poolish) -->
+                    <div id="prefermentSection" class="hidden mb-4 p-3.5 bg-amber-50/90 rounded-xl border border-amber-300/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-bold text-orange-950" id="prefTitle">
+                                1. Biga (Preparare 14h prima)
+                            </h3>
+                            <span class="text-[10px] font-semibold uppercase px-2 py-0.5 bg-amber-200/70 text-orange-950 rounded" id="prefHydrationTag">45% H₂O</span>
+                        </div>
+                        <div class="space-y-1.5 text-xs">
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">
+                                    <span class="lang-it">Farina Prefermento (30% tot.)</span>
+                                    <span class="lang-en">Pre-ferment Flour (30% total)</span>
+                                </span>
+                                <span class="mono-font font-bold text-stone-900" id="resPrefFlour">150g</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-stone-600">
+                                    <span class="lang-it">Acqua Prefermento</span>
+                                    <span class="lang-en">Pre-ferment Water</span>
+                                </span>
+                                <span class="mono-font font-bold text-stone-900" id="resPrefWater">68g</span>
+                            </div>
+                            <div class="flex justify-between text-orange-900 pt-1 border-t border-amber-200/70">
+                                <span class="font-medium">
+                                    <span class="lang-it">Lievito Prefermento</span>
+                                    <span class="lang-en">Pre-ferment Yeast</span>
+                                </span>
+                                <span class="mono-font font-bold" id="resPrefYeast">0.35g</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2: Main Dough Ingredients -->
+                    <h3 class="text-sm font-bold text-stone-800 mb-2 hidden" id="mainDoughHeader">
+                        <span class="lang-it">2. Rinfresco / Impasto Finale</span>
+                        <span class="lang-en">2. Final Main Dough</span>
+                    </h3>
+
+                    <div class="divide-y divide-stone-100 text-sm">
+                        <div class="py-2 flex justify-between items-center">
+                            <div>
+                                <span class="font-medium text-stone-800" id="labelMainFlour">Farina Totale</span>
+                                <span class="block text-[10px] text-stone-400 mono-font" id="bakersPctFlour">100% Baker's</span>
+                            </div>
+                            <span class="mono-font font-bold text-base text-stone-900" id="resFlour">500g</span>
+                        </div>
+
+                        <div class="py-2 flex justify-between items-center">
+                            <div>
+                                <span class="font-medium text-stone-800" id="labelMainWater">Acqua</span>
+                                <span class="block text-[10px] text-stone-400 mono-font" id="bakersPctWater">65% Baker's</span>
+                            </div>
+                            <span class="mono-font font-bold text-base text-sky-900" id="resWater">325g</span>
+                        </div>
+
+                        <div id="rowOil" class="py-2 hidden justify-between items-center">
+                            <div>
+                                <span class="font-medium text-stone-800">
+                                    <span class="lang-it">Olio Extra Vergine d'Oliva</span>
+                                    <span class="lang-en">Extra Virgin Olive Oil</span>
+                                </span>
+                                <span class="block text-[10px] text-stone-400 mono-font" id="bakersPctOil">5.0% Baker's</span>
+                            </div>
+                            <span class="mono-font font-bold text-base text-amber-800" id="resOil">25g</span>
+                        </div>
+
+                        <div class="py-2 flex justify-between items-center">
+                            <div>
+                                <span class="font-medium text-stone-800">
+                                    <span class="lang-it">Sale Marino Fino</span>
+                                    <span class="lang-en">Fine Sea Salt</span>
+                                </span>
+                                <span class="block text-[10px] text-stone-400 mono-font" id="bakersPctSalt">2.0% Baker's</span>
+                            </div>
+                            <span class="mono-font font-bold text-base text-stone-900" id="resSalt">10.0g</span>
+                        </div>
+
+                        <div class="py-2.5 px-3 my-1 flex justify-between items-center bg-orange-50/90 rounded-xl border border-orange-200/70 text-orange-950">
+                            <div>
+                                <span class="font-semibold text-xs block" id="labelMainYeast">Lievito Secco Istantaneo</span>
+                                <span class="text-[10px] text-orange-800/80 mono-font" id="bakersPctYeast">0.50% • Termo-calibrato</span>
+                            </div>
+                            <span class="mono-font font-bold text-base text-orange-900" id="resYeast">2.50g</span>
+                        </div>
+                    </div>
+
+                    <!-- Focaccia Salamoia Callout -->
+                    <div id="salamoiaBox" class="hidden mt-3 p-3 rounded-xl bg-lime-50/80 border border-lime-300/70 text-xs">
+                        <div class="font-bold text-lime-950 mb-1 flex items-center justify-between">
+                            <span>🫒 <span class="lang-it">Emulsione Salamoia (Copertura Focaccia)</span><span class="lang-en">Salamoia Brine (Focaccia Topping)</span></span>
+                        </div>
+                        <p class="text-lime-900/90 mono-font text-[11px]" id="salamoiaAmounts">
+                            30g Olio EVO + 30g Acqua tiepida + 4g Sale grosso in fiocchi
+                        </p>
+                    </div>
+
+                    <!-- Footer Totals -->
+                    <div class="mt-4 pt-3 border-t border-dashed border-stone-200 flex justify-between items-center text-xs text-stone-600">
+                        <span>
+                            <span class="lang-it">Pezzatura per unità:</span>
+                            <span class="lang-en">Target unit weight:</span>
+                            <strong class="mono-font text-stone-900 ml-1" id="perUnitWeightFooter">837g × 1</strong>
+                        </span>
+                        <span class="font-bold text-orange-950 uppercase tracking-wider mono-font" id="totalDoughFooter">
+                            Tot: 837g
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Tabella di Marcia & Thermal Baking Guide -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Tabella di Marcia (7 cols) -->
+            <div class="lg:col-span-7 card p-5">
+                <div class="flex items-center justify-between mb-4 border-b border-stone-100 pb-3">
+                    <div>
+                        <h2 class="text-xl font-bold text-orange-950 flex items-center gap-2">
+                            <span>⏰</span>
+                            <span class="lang-it">Tabella di Marcia</span>
+                            <span class="lang-en">Master Baking Timeline</span>
+                        </h2>
+                        <p class="text-xs text-stone-500">
+                            <span class="lang-it">Cronoprogramma passo-passo basato su temperatura e metodo</span>
+                            <span class="lang-en">Step-by-step schedule calibrated to your temperature and method</span>
+                        </p>
+                    </div>
+                    <span class="mono-font text-xs font-semibold px-2.5 py-1 bg-stone-100 text-stone-700 rounded-lg" id="totalDurationBadge">
+                        Durata: 4h 45m
+                    </span>
+                </div>
+
+                <div class="space-y-3 relative before:absolute before:top-3 before:bottom-3 before:left-3.5 before:w-0.5 before:bg-orange-200" id="scheduleContainer">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </div>
+
+            <!-- Guida alla Cottura (5 cols) -->
+            <div class="lg:col-span-5 card p-5 bg-stone-900 text-stone-100 border-stone-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between border-b border-stone-700/80 pb-3 mb-4">
+                        <h2 class="text-xl font-bold text-amber-300 flex items-center gap-2">
+                            <span>🔥</span>
+                            <span class="lang-it">Protocollo di Cottura</span>
+                            <span class="lang-en">Thermal Baking Protocol</span>
+                        </h2>
+                        <span class="mono-font text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30" id="bakeMethodTag">
+                            Pentola in Ghisa
+                        </span>
+                    </div>
+
+                    <div id="bakingGuideSteps" class="space-y-3.5 text-xs leading-relaxed text-stone-300">
+                        <!-- Dynamically populated per style -->
                     </div>
                 </div>
 
-                <div class="card p-5 bg-stone-50 border border-stone-200">
-                    <h2 class="text-lg font-semibold mb-3 flex items-center gap-2 text-stone-800">
-                        <span>⏰</span> 
-                        <span class="lang-it">Tabella di Marcia</span><span class="lang-en">Baking Schedule</span>
-                    </h2>
-                    <div class="space-y-3 text-xs" id="scheduleContainer">
-                        </div>
+                <div class="mt-6 pt-4 border-t border-stone-800 text-[11px] text-stone-400 flex items-center justify-between">
+                    <span>
+                        <span class="lang-it">Temp. Interna Target al Cuore:</span>
+                        <span class="lang-en">Target Internal Crumb Temp:</span>
+                    </span>
+                    <span class="mono-font font-bold text-amber-300" id="internalTempTarget">205°F–210°F (96°C–99°C)</span>
                 </div>
             </div>
         </div>
 
-        <div class="mt-8 card p-6 bg-orange-900 text-orange-50">
-            <h3 class="text-xl font-bold mb-4 border-b border-orange-800 pb-2 italic">
-                <span class="lang-it">Vocabolario ed Etimologia</span>
-                <span class="lang-en">Vocabulary & Etymology</span>
-            </h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+        <!-- Section 4: Vocabolario ed Etimologia (Classical & Vulgar Latin Lexicon) -->
+        <section class="card p-6 bg-gradient-to-br from-orange-950 via-stone-900 to-orange-950 text-orange-50">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-orange-800/60 pb-3 mb-5">
                 <div>
-                    <span class="font-bold text-orange-300">Farina</span> (Flour) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "farina" (from "far", spelt/grain)</span>
+                    <h3 class="text-2xl font-bold italic text-amber-200">
+                        <span class="lang-it">Vocabolario ed Etimologia Latina</span>
+                        <span class="lang-en">Baking Lexicon &amp; Latin Etymology</span>
+                    </h3>
+                    <p class="text-xs text-orange-200/70">
+                        <span class="lang-it">Le radici classiche e volgari dell'arte bianca italiana</span>
+                        <span class="lang-en">Classical and Vulgar Latin roots of the Italian baker's craft</span>
+                    </p>
                 </div>
-                <div>
-                    <span class="font-bold text-orange-300">Lievito</span> (Yeast) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "levare" (to raise/lift)</span>
+                <span class="text-[11px] mono-font uppercase tracking-widest text-amber-300/80">Ars Pistorica</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Farina <span class="font-normal text-orange-200/70">(Flour)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>farīna</strong>, da <em>far, farris</em> (farro, spelta; il grano sacro di Roma antica).</div>
                 </div>
-                <div>
-                    <span class="font-bold text-orange-300">Impasto</span> (Dough) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Vulgar Latin "impastare" (to put in paste)</span>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Lievito <span class="font-normal text-orange-200/70">(Yeast)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>levāre</strong> (sollevare, alleggerire, da <em>levis</em> "leggero"). Classico: <em>fermentum</em>.</div>
                 </div>
-                <div>
-                    <span class="font-bold text-orange-300">Focaccia</span> (Flatbread) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "panis focacius" (hearth bread, from "focus")</span>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Focaccia <span class="font-normal text-orange-200/70">(Hearth Bread)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. tardo <strong>(panis) focācius</strong>, cotto direttamente sul <em>focus</em> (focolare domestico).</div>
                 </div>
-                <div>
-                    <span class="font-bold text-orange-300">Biga</span> (Pre-ferment) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "bigae" (two-horse chariot, driving fermentation)</span>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Biga <span class="font-normal text-orange-200/70">(Stiff Pre-ferment)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>bīgae</strong> (contratto da <em>bi-iugae</em>, carro a due cavalli che "traina" l'impasto).</div>
                 </div>
-                <div>
-                    <span class="font-bold text-orange-300">Alveoli</span> (Crumb holes) <br>
-                    <span class="text-[11px] text-orange-200/80 italic">&lt; Latin "alveolus" (small hollow/cavity)</span>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Alveoli <span class="font-normal text-orange-200/70">(Crumb Structure)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>alveolus</strong>, dim. di <em>alveus</em> (piccola cavità, conca, arnia delle api).</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Impasto <span class="font-normal text-orange-200/70">(Dough)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. volg. <strong>impastāre</strong>, da <em>pasta</em> (&lt; Greco <em>pástē</em>, intriso d'orzo e farina).</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Puntatura &amp; Appretto <span class="font-normal text-orange-200/70">(Bulk &amp; Final Proof)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>pūnctum</strong> (spinta iniziale del gas) e <strong>appectorāre</strong> / <em>ad-praestāre</em> (approntare per il forno).</div>
+                </div>
+                <div class="p-3 rounded-xl bg-white/5 border border-white/10">
+                    <div class="font-bold text-amber-300 text-sm">Salamoia <span class="font-normal text-orange-200/70">(Salt Brine)</span></div>
+                    <div class="text-[11px] text-orange-100/80 italic mt-1">&lt; Lat. <strong>sal mŭria</strong> (acqua salata ad alta concentrazione usata fin dall'età repubblicana).</div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <footer class="mt-8 text-center text-gray-400 text-xs pb-12">
-            <p>Pane Perfetto v3.1 • <span class="lang-it">Progettato per gli amanti del dettaglio</span><span class="lang-en">Designed for the detail-oriented</span></p>
+        <footer class="text-center text-stone-400 text-xs pt-4">
+            <p>Pane Perfetto v4.0 • <span class="lang-it">Progettato per la precisione artigianale</span><span class="lang-en">Engineered for artisanal precision</span></p>
         </footer>
-    </div>
+    </main>
 
-    <script type="module" src="./js/app.js"></script>
+    <script>
+        // --- Core Style Definitions ---
+        const STYLES = {
+            classico: {
+                id: 'classico',
+                nameIt: 'Pane Classico (Filone / Pagnotta)',
+                nameEn: 'Pane Classico (Artisan Loaf)',
+                hydration: 65,
+                flourPerUnit: 500,
+                units: 1,
+                saltPct: 2.0,
+                oilPct: 0,
+                ambientHrs: 4,
+                coldHrs: 0,
+                unitLabelIt: 'Pagnotta',
+                unitLabelEn: 'Loaf',
+                flourRecIt: 'Farina: Tipo 0 / Tipo 1 (W260–280, 12% prot.)',
+                flourRecEn: 'Flour: Tipo 0 / Bread Flour (W260–280, 12% prot.)',
+                bakeTempBadge: '450°F (230°C) • Dutch Oven',
+                bakeTagIt: 'Pentola in Ghisa (Dutch Oven)',
+                bakeTagEn: 'Cast Iron Dutch Oven',
+                internalTemp: '208°F (98°C)',
+                descIt: 'Equilibrio classico tra crosta croccante caramellata e mollica ben sviluppata. Ideale per cottura in pentola di ghisa preriscaldata a 450°F.',
+                descEn: 'Classic balance between a shattering caramelized crust and structured open crumb. Ideal for baking in a preheated 450°F cast iron Dutch oven.',
+                guideIt: [
+                    '<strong>1. Preriscaldamento (45 min prima):</strong> Inserisci la pentola in ghisa (Dutch Oven) chiusa nel forno a <strong>450°F (230°C)</strong>.',
+                    '<strong>2. Incisione (Taglio):</strong> Ribalta la pagnotta su carta forno, incidi a 45° con lametta (<em>lame</em>) per guidare lo sviluppo in forno.',
+                    '<strong>3. Cottura Coperta (20 min):</strong> Inforna con coperchio chiuso a 450°F per intrappolare il vapore endogeno e massimizzare l\'<em>oven spring</em>.',
+                    '<strong>4. Cottura Scoperta (20–25 min):</strong> Rimuovi il coperchio (abbassa a 425°F se scurisce troppo) fino a crosta bruno-dorata profonda. Raffredda su griglia per 1 ora.'
+                ],
+                guideEn: [
+                    '<strong>1. Preheat (45 min prior):</strong> Place your covered cast iron Dutch oven inside the oven at <strong>450°F (230°C)</strong>.',
+                    '<strong>2. Score:</strong> Turn the proofed loaf onto parchment and score at a 45° angle with a razor lame to direct oven spring.',
+                    '<strong>3. Bake Covered (20 min):</strong> Bake with the lid on at 450°F to trap steam and maximize gelatinization and expansion.',
+                    '<strong>4. Bake Uncovered (20–25 min):</strong> Remove lid (reduce to 425°F if browning rapidly) until deep mahogany. Cool on a wire rack for 1 hour.'
+                ]
+            },
+            ciabatta: {
+                id: 'ciabatta',
+                nameIt: 'Ciabatta ad Alta Idratazione',
+                nameEn: 'High-Hydration Ciabatta',
+                hydration: 80,
+                flourPerUnit: 250,
+                units: 2,
+                saltPct: 2.1,
+                oilPct: 0,
+                ambientHrs: 4,
+                coldHrs: 0,
+                unitLabelIt: 'Ciabatta',
+                unitLabelEn: 'Slipper Loaf',
+                flourRecIt: 'Farina: Tipo 0 Forte / Manitoba (W320+, 13.5% prot.)',
+                flourRecEn: 'Flour: High-Gluten / Tipo 0 Strong (W320+, 13.5% prot.)',
+                bakeTempBadge: '475°F (245°C) • Pietra + Vapore',
+                bakeTagIt: 'Pietra Refrattaria / Acciaio + Vapore',
+                bakeTagEn: 'Baking Stone / Steel + Steam',
+                internalTemp: '210°F (99°C)',
+                descIt: 'Impasto estremo all\'80% di idratazione: richiede pieghe in ciotola (coil folds) delicate e uno staglio su abbondante semola senza sgonfiare gli alveoli.',
+                descEn: '80% high-hydration dough: relies on gentle coil folds to build a strong gluten network and careful dividing onto semolina without degassing the alveoli.',
+                guideIt: [
+                    '<strong>1. Pietra e Vapore (45 min prima):</strong> Preriscalda pietra refrattaria o piastra d\'acciaio a <strong>475°F (245°C)</strong> con un pentolino metallico sul fondo.',
+                    '<strong>2. Staglio delicato:</strong> Rovescia l\'impasto sul banco infarinato con semola rimacinata; dividi in rettangoli con tarocco senza mai schiacciare i gas.',
+                    '<strong>3. Infornata con Vapore (12 min):</strong> Trasferisci su pala, inforna e versa acqua bollente nel pentolino per generare vapore immediato.',
+                    '<strong>4. Asciugatura (12–15 min):</strong> Rimuovi il vapore, abbassa a <strong>440°F (225°C)</strong> e termina fino a crosta sottile, leggera e super croccante.'
+                ],
+                guideEn: [
+                    '<strong>1. Stone &amp; Steam Setup (45 min prior):</strong> Preheat baking stone or steel at <strong>475°F (245°C)</strong> with a heavy metal steam pan on the lower rack.',
+                    '<strong>2. Gentle Handling:</strong> Tip dough onto a generously floured/semolina surface; divide into rectangles with a bench scraper without compressing gas pockets.',
+                    '<strong>3. Steam Bake (12 min):</strong> Slide onto stone and pour boiling water into the steam tray to create immediate oven humidity.',
+                    '<strong>4. Crisp &amp; Vent (12–15 min):</strong> Vent oven, reduce to <strong>440°F (225°C)</strong>, and bake until light, hollow, and crisp.'
+                ]
+            },
+            focaccia: {
+                id: 'focaccia',
+                nameIt: 'Focaccia Tradizionale in Teglia',
+                nameEn: 'Traditional Pan Focaccia',
+                hydration: 75,
+                flourPerUnit: 500,
+                units: 1,
+                saltPct: 2.2,
+                oilPct: 5.0,
+                ambientHrs: 5,
+                coldHrs: 0,
+                unitLabelIt: 'Teglia',
+                unitLabelEn: 'Pan',
+                flourRecIt: 'Farina: Tipo 0 (W260–290, 12–12.5% prot.)',
+                flourRecEn: 'Flour: Tipo 0 / All-Purpose + Bread (12% prot.)',
+                bakeTempBadge: '450°F (230°C) • Teglia Oliata',
+                bakeTagIt: 'Teglia in Ferro Blu / Alluminio',
+                bakeTagEn: 'Oiled Metal Sheet Pan',
+                internalTemp: '203°F (95°C)',
+                descIt: 'Soffice all\'interno e croccante alla base grazie all\'Olio EVO nell\'impasto e alla caratteristica salamoia versata nei buchi prima di infornare.',
+                descEn: 'Pillowy interior and fried-crisp base driven by Extra Virgin Olive Oil in the dough and classic salt-water-oil salamoia pooled into the dimples.',
+                guideIt: [
+                    '<strong>1. Stesura in Teglia:</strong> Ungi generosamente la teglia con Olio EVO. Stendi l\'impasto con i polpastrelli e lascia lievitare coperto.',
+                    '<strong>2. I Buchi e la Salamoia:</strong> Preriscalda a <strong>450°F (230°C)</strong>. Emulsiona acqua tiepida, olio EVO e sale; versala sull\'impasto e affonda le dita verticalmente fino al fondo della teglia.',
+                    '<strong>3. Cottura Parte Bassa (12 min):</strong> Inforna sul ripiano basso per garantire una base dorata e croccante.',
+                    '<strong>4. Doratura Superiore (8–10 min):</strong> Sposta a metà forno fino a doratura ambrata sulle bolle superficiali.'
+                ],
+                guideEn: [
+                    '<strong>1. Pan Proof:</strong> Coat pan generously with EVOO. Stretch dough gently toward corners and proof until bubbly.',
+                    '<strong>2. Dimpling &amp; Salamoia:</strong> Preheat to <strong>450°F (230°C)</strong>. Whisk warm water, EVOO, and flaky salt; pour over dough and press fingers straight down to the pan floor.',
+                    '<strong>3. Bottom Rack Sear (12 min):</strong> Start on the bottom rack to crisp the olive-oil crust underneath.',
+                    '<strong>4. Top Golden Finish (8–10 min):</strong> Move to middle/upper rack until dimpled peaks turn deep golden brown.'
+                ]
+            },
+            pizza: {
+                id: 'pizza',
+                nameIt: 'Pizza (Napoletana / Classica)',
+                nameEn: 'Artisan Pizza (Napoletana / Classica)',
+                hydration: 62,
+                flourPerUnit: 160,
+                units: 4,
+                saltPct: 2.5,
+                oilPct: 0,
+                ambientHrs: 6,
+                coldHrs: 24,
+                unitLabelIt: 'Panetto',
+                unitLabelEn: 'Dough Ball',
+                flourRecIt: 'Farina: Tipo 00 (W280–310, 12.5% prot.)',
+                flourRecEn: 'Flour: Tipo 00 Pizza Flour (W280–310, 12.5% prot.)',
+                bakeTempBadge: '850°F–900°F (Ooni) / 550°F Steel',
+                bakeTagIt: 'Forno Pizza (Ooni) o Acciaio',
+                bakeTagEn: 'Pizza Oven (Ooni) or Baking Steel',
+                internalTemp: 'Cornicione alveolato',
+                descIt: 'Calibrata su panetti singoli da ~260g (160g farina cad.). L\'idratazione al 62–65% garantisce stendibilità ottimale senza strappi e cornicione maculato ad alta temperatura.',
+                descEn: 'Calibrated to ~260g individual dough balls (160g flour each). 62–65% hydration ensures clean extensibility on the peel and leopard-spotted blistering at high heat.',
+                guideIt: [
+                    '<strong>1. Temperatura Pietra:</strong> In forno dedicato (es. Ooni), porta il centro della pietra a <strong>800°F–850°F (430°C–455°C)</strong>; in forno casalingo preriscalda piastra in acciaio al massimo (550°F) + Grill.',
+                    '<strong>2. Stesura (Slap &amp; Fold):</strong> Stendi il panetto a temperatura ambiente dal centro verso l\'esterno, preservando 1.5 cm di gas nel <em>cornicione</em>.',
+                    '<strong>3. Condimento Rapido:</strong> Pomodoro San Marzano schiacciato a mano, fior di latte ben scolato, basilico e filo d\'olio.',
+                    '<strong>4. Cottura Lampo:</strong> <strong>60–90 secondi</strong> in forno pizza ruotando ogni 20 sec (oppure 4–5 min su acciaio in forno domestico).'
+                ],
+                guideEn: [
+                    '<strong>1. Deck Temperature:</strong> In an outdoor pizza oven (e.g., Ooni), bring center stone to <strong>800°F–850°F (430°C–455°C)</strong>; for home ovens, preheat Baking Steel at max (550°F) + Broiler.',
+                    '<strong>2. Open the Dough:</strong> Press gas from center outward on semolina/flour, preserving a 1.5 cm inflated rim (<em>cornicione</em>).',
+                    '<strong>3. Top Lightly:</strong> Crushed San Marzano tomatoes, drained fior di latte mozzarella, fresh basil, and EVOO drizzle.',
+                    '<strong>4. Flash Bake:</strong> <strong>60–90 seconds</strong> in high-heat oven turning every 20s (or 4–5 min on home Baking Steel).'
+                ]
+            }
+        };
+
+        // --- Application State ---
+        const state = {
+            lang: 'it',
+            style: 'classico',
+            flourPerUnit: 500,
+            units: 1,
+            hydration: 65,
+            oilPct: 0,
+            saltPct: 2.0,
+            ambientHrs: 4,
+            coldHrs: 0,
+            tempF: 72,
+            preferment: 'none', // 'none' | 'biga' | 'poolish'
+            yeastType: 'idy',   // 'idy' | 'ady' | 'fresh'
+            scheduleMode: 'start' // 'start' (forward) | 'end' (backward from target bake)
+        };
+
+        // --- DOM Elements ---
+        const el = {
+            body: document.body,
+            btnIt: document.getElementById('btnIt'),
+            btnEn: document.getElementById('btnEn'),
+            btnCopyRecipe: document.getElementById('btnCopyRecipe'),
+            btnResetStyle: document.getElementById('btnResetStyle'),
+            styleCards: document.querySelectorAll('.style-card'),
+            prefBtns: document.querySelectorAll('.pref-btn'),
+            styleBannerTitle: document.getElementById('styleBannerTitle'),
+            styleBannerDesc: document.getElementById('styleBannerDesc'),
+            badgeFlourRec: document.getElementById('badgeFlourRec'),
+            badgeBakeTemp: document.getElementById('badgeBakeTemp'),
+            flourRange: document.getElementById('flourRange'),
+            flourValue: document.getElementById('flourValue'),
+            loafRange: document.getElementById('loafRange'),
+            loafValue: document.getElementById('loafValue'),
+            hydrationRange: document.getElementById('hydrationRange'),
+            hydrationValue: document.getElementById('hydrationValue'),
+            oilRange: document.getElementById('oilRange'),
+            oilValue: document.getElementById('oilValue'),
+            timeRange: document.getElementById('timeRange'),
+            timeValue: document.getElementById('timeValue'),
+            coldRange: document.getElementById('coldRange'),
+            coldValue: document.getElementById('coldValue'),
+            tempRange: document.getElementById('tempRange'),
+            tempValue: document.getElementById('tempValue'),
+            yeastTypeSelect: document.getElementById('yeastTypeSelect'),
+            startTime: document.getElementById('startTime'),
+            btnToggleScheduleMode: document.getElementById('btnToggleScheduleMode'),
+            lblClockModeIt: document.getElementById('lblClockModeIt'),
+            lblClockModeEn: document.getElementById('lblClockModeEn'),
+            fermentRateBadge: document.getElementById('fermentRateBadge'),
+            unitWeightPreview: document.getElementById('unitWeightPreview'),
+            totalWeightBadge: document.getElementById('totalWeightBadge'),
+            lblHydrationSummary: document.getElementById('lblHydrationSummary'),
+            barFlour: document.getElementById('barFlour'),
+            barWater: document.getElementById('barWater'),
+            barOil: document.getElementById('barOil'),
+            barSalt: document.getElementById('barSalt'),
+            barYeast: document.getElementById('barYeast'),
+            legendFlour: document.getElementById('legendFlour'),
+            legendWater: document.getElementById('legendWater'),
+            legendOilWrap: document.getElementById('legendOilWrap'),
+            legendOil: document.getElementById('legendOil'),
+            legendSalt: document.getElementById('legendSalt'),
+            prefermentSection: document.getElementById('prefermentSection'),
+            prefTitle: document.getElementById('prefTitle'),
+            prefHydrationTag: document.getElementById('prefHydrationTag'),
+            resPrefFlour: document.getElementById('resPrefFlour'),
+            resPrefWater: document.getElementById('resPrefWater'),
+            resPrefYeast: document.getElementById('resPrefYeast'),
+            mainDoughHeader: document.getElementById('mainDoughHeader'),
+            labelMainFlour: document.getElementById('labelMainFlour'),
+            labelMainWater: document.getElementById('labelMainWater'),
+            labelMainYeast: document.getElementById('labelMainYeast'),
+            bakersPctFlour: document.getElementById('bakersPctFlour'),
+            bakersPctWater: document.getElementById('bakersPctWater'),
+            bakersPctOil: document.getElementById('bakersPctOil'),
+            bakersPctSalt: document.getElementById('bakersPctSalt'),
+            bakersPctYeast: document.getElementById('bakersPctYeast'),
+            resFlour: document.getElementById('resFlour'),
+            resWater: document.getElementById('resWater'),
+            rowOil: document.getElementById('rowOil'),
+            resOil: document.getElementById('resOil'),
+            resSalt: document.getElementById('resSalt'),
+            resYeast: document.getElementById('resYeast'),
+            salamoiaBox: document.getElementById('salamoiaBox'),
+            salamoiaAmounts: document.getElementById('salamoiaAmounts'),
+            perUnitWeightFooter: document.getElementById('perUnitWeightFooter'),
+            totalDoughFooter: document.getElementById('totalDoughFooter'),
+            scheduleContainer: document.getElementById('scheduleContainer'),
+            totalDurationBadge: document.getElementById('totalDurationBadge'),
+            bakeMethodTag: document.getElementById('bakeMethodTag'),
+            bakingGuideSteps: document.getElementById('bakingGuideSteps'),
+            internalTempTarget: document.getElementById('internalTempTarget')
+        };
+
+        // --- Initialize Default DateTime ---
+        function setDefaultStartTime() {
+            const now = new Date();
+            now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0);
+            const tzOffset = now.getTimezoneOffset() * 60000;
+            el.startTime.value = new Date(now - tzOffset).toISOString().slice(0, 16);
+        }
+
+        // --- Apply Style Preset ---
+        function applyStylePreset(styleKey) {
+            const s = STYLES[styleKey];
+            if (!s) return;
+            state.style = styleKey;
+            state.flourPerUnit = s.flourPerUnit;
+            state.units = s.units;
+            state.hydration = s.hydration;
+            state.oilPct = s.oilPct;
+            state.saltPct = s.saltPct;
+            state.ambientHrs = s.ambientHrs;
+            state.coldHrs = s.coldHrs;
+
+            el.flourRange.value = state.flourPerUnit;
+            el.loafRange.value = state.units;
+            el.hydrationRange.value = state.hydration;
+            el.oilRange.value = state.oilPct;
+            el.timeRange.value = state.ambientHrs;
+            el.coldRange.value = state.coldHrs;
+
+            el.styleCards.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.style === styleKey);
+            });
+
+            calculateAll();
+        }
+
+        // --- Biological Yeast & Baker's Math Engine ---
+        function calculateAll() {
+            const isIt = state.lang === 'it';
+            const styleObj = STYLES[state.style];
+
+            // 1. Base Flour, Water, Salt, Oil
+            const totalFlour = state.flourPerUnit * state.units;
+            const totalWater = Math.round(totalFlour * (state.hydration / 100));
+            const totalSalt = +(totalFlour * (state.saltPct / 100)).toFixed(1);
+            const totalOil = Math.round(totalFlour * (state.oilPct / 100));
+
+            // 2. Biological Yeast Model (Temp + Ambient Time + Cold Retard)
+            // Thermal activity doubles every ~15°F above 72°F baseline
+            const tempMultiplier = Math.pow(2, (state.tempF - 72) / 15);
+            // Effective fermentation hours (cold fridge hours at 38°F count as ~0.12x ambient hours)
+            const effectiveHours = state.ambientHrs + (state.coldHrs * 0.12);
+            // Baseline IDY at 72°F for 4 hours = 0.50% of flour
+            const baseIdyPct = 0.005 * Math.pow(4 / effectiveHours, 0.85) / tempMultiplier;
+
+            // Yeast type conversion multiplier (IDY = 1.0, ADY = 1.25, Fresh = 3.0)
+            const yeastConversion = state.yeastType === 'ady' ? 1.25 : (state.yeastType === 'fresh' ? 3.0 : 1.0);
+
+            // 3. Pre-ferment Split (Biga 45% or Poolish 100%)
+            let prefFlour = 0;
+            let prefWater = 0;
+            let prefYeast = 0;
+            let mainFlour = totalFlour;
+            let mainWater = totalWater;
+            let mainYeast = 0;
+
+            if (state.preferment === 'biga') {
+                prefFlour = Math.round(totalFlour * 0.30);
+                prefWater = Math.round(prefFlour * 0.45);
+                // Biga ferments 14h at kitchen temp (~0.18% IDY at 72°F, scaled for temp)
+                prefYeast = +(prefFlour * (0.0018 / tempMultiplier) * yeastConversion).toFixed(2);
+                mainFlour = totalFlour - prefFlour;
+                mainWater = totalWater - prefWater;
+                mainYeast = +(totalFlour * baseIdyPct * 0.55 * yeastConversion).toFixed(2);
+            } else if (state.preferment === 'poolish') {
+                prefFlour = Math.round(totalFlour * 0.30);
+                prefWater = prefFlour; // 100% hydration
+                prefYeast = +(prefFlour * (0.0022 / tempMultiplier) * yeastConversion).toFixed(2);
+                mainFlour = totalFlour - prefFlour;
+                mainWater = Math.max(0, totalWater - prefWater);
+                mainYeast = +(totalFlour * baseIdyPct * 0.55 * yeastConversion).toFixed(2);
+            } else {
+                mainYeast = +(totalFlour * baseIdyPct * yeastConversion).toFixed(2);
+            }
+
+            prefYeast = Math.max(0.10, prefYeast);
+            mainYeast = Math.max(0.15, mainYeast);
+
+            const totalYeast = +(prefYeast + mainYeast).toFixed(2);
+            const totalMass = Math.round(totalFlour + totalWater + totalSalt + totalOil + totalYeast);
+            const unitMass = Math.round(totalMass / state.units);
+
+            // --- Update UI Labels & Readouts ---
+            const tempC = ((state.tempF - 32) * 5 / 9).toFixed(1);
+            el.flourValue.textContent = `${state.flourPerUnit}g`;
+            el.loafValue.textContent = `${state.units}`;
+            el.hydrationValue.textContent = `${state.hydration}%`;
+            el.oilValue.textContent = `${state.oilPct}%`;
+            el.timeValue.textContent = `${state.ambientHrs}h`;
+            el.coldValue.textContent = `${state.coldHrs}h`;
+            el.tempValue.textContent = `${state.tempF}°F (${tempC}°C)`;
+
+            el.fermentRateBadge.textContent = isIt
+                ? `Cinetica Lievito: ${tempMultiplier.toFixed(2)}x`
+                : `Yeast Kinetics: ${tempMultiplier.toFixed(2)}x`;
+
+            // Style Banner
+            el.styleBannerTitle.textContent = isIt
+                ? `Profilo Tecnico • ${styleObj.nameIt}`
+                : `Technical Profile • ${styleObj.nameEn}`;
+            el.styleBannerDesc.textContent = isIt ? styleObj.descIt : styleObj.descEn;
+            el.badgeFlourRec.textContent = isIt ? styleObj.flourRecIt : styleObj.flourRecEn;
+            el.badgeBakeTemp.textContent = styleObj.bakeTempBadge;
+
+            // Unit & Total Weight Badges
+            const unitName = isIt ? styleObj.unitLabelIt : styleObj.unitLabelEn;
+            el.unitWeightPreview.textContent = `~${unitMass}g / ${unitName.toLowerCase()}`;
+            el.totalWeightBadge.textContent = `${totalMass}g`;
+            el.lblHydrationSummary.textContent = isIt
+                ? `${state.hydration}% Idratazione`
+                : `${state.hydration}% Hydration`;
+
+            // 100% Mass Composition Bar
+            const pctMassFlour = ((totalFlour / totalMass) * 100).toFixed(1);
+            const pctMassWater = ((totalWater / totalMass) * 100).toFixed(1);
+            const pctMassOil = ((totalOil / totalMass) * 100).toFixed(1);
+            const pctMassSalt = ((totalSalt / totalMass) * 100).toFixed(1);
+            const pctMassYeast = Math.max(0.5, ((totalYeast / totalMass) * 100)).toFixed(1);
+
+            el.barFlour.style.width = `${pctMassFlour}%`;
+            el.barWater.style.width = `${pctMassWater}%`;
+            el.barOil.style.width = `${pctMassOil}%`;
+            el.barSalt.style.width = `${pctMassSalt}%`;
+            el.barYeast.style.width = `${pctMassYeast}%`;
+
+            el.legendFlour.textContent = `${isIt ? 'Farina' : 'Flour'} ${pctMassFlour}%`;
+            el.legendWater.textContent = `${isIt ? 'Acqua' : 'Water'} ${pctMassWater}%`;
+            el.legendSalt.textContent = `${isIt ? 'Sale' : 'Salt'} ${pctMassSalt}%`;
+
+            if (totalOil > 0) {
+                el.legendOilWrap.classList.remove('hidden');
+                el.legendOilWrap.classList.add('flex');
+                el.legendOil.textContent = `${isIt ? 'Olio' : 'Oil'} ${pctMassOil}%`;
+                el.rowOil.classList.remove('hidden');
+                el.rowOil.classList.add('flex');
+                el.resOil.textContent = `${totalOil}g`;
+                el.bakersPctOil.textContent = `${state.oilPct}% Baker's`;
+            } else {
+                el.legendOilWrap.classList.add('hidden');
+                el.legendOilWrap.classList.remove('flex');
+                el.rowOil.classList.add('hidden');
+                el.rowOil.classList.remove('flex');
+            }
+
+            // Pre-ferment Display
+            if (state.preferment !== 'none') {
+                el.prefermentSection.classList.remove('hidden');
+                el.mainDoughHeader.classList.remove('hidden');
+                const isBiga = state.preferment === 'biga';
+                el.prefTitle.textContent = isBiga
+                    ? (isIt ? '1. Biga (Preparare 14h prima)' : '1. Biga (Mix 14h prior)')
+                    : (isIt ? '1. Poolish (Preparare 10h prima)' : '1. Poolish (Mix 10h prior)');
+                el.prefHydrationTag.textContent = isBiga ? '45% H₂O' : '100% H₂O';
+                el.resPrefFlour.textContent = `${prefFlour}g`;
+                el.resPrefWater.textContent = `${prefWater}g`;
+                el.resPrefYeast.textContent = `${prefYeast.toFixed(2)}g`;
+
+                el.labelMainFlour.textContent = isIt ? 'Farina Rinfresco (70%)' : 'Main Dough Flour (70%)';
+                el.labelMainWater.textContent = isIt ? 'Acqua Rinfresco' : 'Main Dough Water';
+                el.bakersPctFlour.textContent = `${isIt ? 'Totale farina:' : 'Total flour:'} ${totalFlour}g`;
+                el.bakersPctWater.textContent = `${isIt ? 'Totale acqua:' : 'Total water:'} ${totalWater}g (${state.hydration}%)`;
+            } else {
+                el.prefermentSection.classList.add('hidden');
+                el.mainDoughHeader.classList.add('hidden');
+                el.labelMainFlour.textContent = isIt ? 'Farina Totale' : 'Total Flour';
+                el.labelMainWater.textContent = isIt ? 'Acqua' : 'Water';
+                el.bakersPctFlour.textContent = `100% Baker's`;
+                el.bakersPctWater.textContent = `${state.hydration}% Baker's`;
+            }
+
+            // Main Dough Numbers
+            el.resFlour.textContent = `${mainFlour}g`;
+            el.resWater.textContent = `${mainWater}g`;
+            el.resSalt.textContent = `${totalSalt}g`;
+            el.bakersPctSalt.textContent = `${state.saltPct.toFixed(1)}% Baker's`;
+
+            const yeastNames = {
+                idy: isIt ? 'Lievito Secco Istantaneo (IDY)' : 'Instant Dry Yeast (IDY)',
+                ady: isIt ? 'Lievito Secco Attivo (ADY)' : 'Active Dry Yeast (ADY)',
+                fresh: isIt ? 'Lievito di Birra Fresco' : 'Fresh Cake Yeast'
+            };
+            el.labelMainYeast.textContent = state.preferment === 'none'
+                ? yeastNames[state.yeastType]
+                : `${yeastNames[state.yeastType]} (${isIt ? 'Impasto' : 'Main'})`;
+
+            const effectiveYeastPct = ((totalYeast / totalFlour) * 100).toFixed(2);
+            el.bakersPctYeast.textContent = `${effectiveYeastPct}% tot • ${state.tempF}°F`;
+            el.resYeast.textContent = `${mainYeast.toFixed(2)}g`;
+
+            // Focaccia Salamoia Box
+            if (state.style === 'focaccia') {
+                el.salamoiaBox.classList.remove('hidden');
+                const salOil = Math.round(totalFlour * 0.06);
+                const salWater = Math.round(totalFlour * 0.06);
+                const salSalt = +(totalFlour * 0.008).toFixed(1);
+                el.salamoiaAmounts.textContent = isIt
+                    ? `${salOil}g Olio EVO + ${salWater}g Acqua tiepida + ${salSalt}g Sale grosso in fiocchi`
+                    : `${salOil}g EVOO + ${salWater}g Warm Water + ${salSalt}g Flaky Sea Salt`;
+            } else {
+                el.salamoiaBox.classList.add('hidden');
+            }
+
+            el.perUnitWeightFooter.textContent = `${unitMass}g × ${state.units}`;
+            el.totalDoughFooter.textContent = `Tot: ${totalMass}g`;
+
+            // Update Baking Guide Panel
+            el.bakeMethodTag.textContent = isIt ? styleObj.bakeTagIt : styleObj.bakeTagEn;
+            el.internalTempTarget.textContent = styleObj.internalTemp;
+            const guideSteps = isIt ? styleObj.guideIt : styleObj.guideEn;
+            el.bakingGuideSteps.innerHTML = guideSteps.map(step => `<p>${step}</p>`).join('');
+
+            // Render Tabella di Marcia
+            renderSchedule(prefFlour, prefWater, prefYeast);
+            saveState();
+        }
+
+        // --- Tabella di Marcia Timeline Generator ---
+        function renderSchedule(prefFlour, prefWater, prefYeast) {
+            const isIt = state.lang === 'it';
+            const anchorInput = el.startTime.value ? new Date(el.startTime.value) : new Date();
+
+            // Relative offsets in minutes from Main Dough Mix (t = 0)
+            const steps = [];
+            const prefLeadHours = state.preferment === 'biga' ? 14 : (state.preferment === 'poolish' ? 10 : 0);
+
+            if (state.preferment !== 'none') {
+                const pName = state.preferment === 'biga' ? 'Biga' : 'Poolish';
+                steps.push({
+                    offsetMin: -prefLeadHours * 60,
+                    badge: `-${prefLeadHours}h`,
+                    title: isIt ? `Preparazione ${pName}` : `Mix ${pName} Pre-ferment`,
+                    desc: isIt
+                        ? `Unisci ${prefFlour}g farina, ${prefWater}g acqua e ${prefYeast}g lievito. Fermenta per ${prefLeadHours}h a ${state.tempF}°F.`
+                        : `Combine ${prefFlour}g flour, ${prefWater}g water, and ${prefYeast}g yeast. Ferment ${prefLeadHours}h at ${state.tempF}°F.`
+                });
+            }
+
+            // t = 0: Main Dough Mix
+            steps.push({
+                offsetMin: 0,
+                badge: '0:00',
+                title: isIt ? 'Impasto Principale & Autolisi' : 'Main Dough Mix & Autolyse',
+                desc: isIt
+                    ? 'Impasta farina, acqua, lievito (e prefermento). Aggiungi il sale (e l\'olio) a maglia glutinica avviata.'
+                    : 'Mix flour, water, yeast (and pre-ferment). Incorporate salt (and olive oil) once gluten begins to develop.'
+            });
+
+            // t = +30m & +60m: Stretch & Folds
+            const foldTypeIt = state.style === 'ciabatta' ? 'Coil Folds (Pieghe delicate in ciotola)' : 'Giri di Pieghe (Stretch & Fold)';
+            const foldTypeEn = state.style === 'ciabatta' ? 'Gentle Coil Folds' : 'Stretch & Folds in Bowl';
+            steps.push({
+                offsetMin: 30,
+                badge: '+0:30',
+                title: isIt ? `2× ${foldTypeIt}` : `2× ${foldTypeEn}`,
+                desc: isIt
+                    ? 'Esegui 2 serie di pieghe a distanza di 30 minuti per dare forza e struttura verticale all\'impasto.'
+                    : 'Perform 2 sets of folds spaced 30 minutes apart to build tensile strength and structure.'
+            });
+
+            const bulkMinutes = Math.round(state.ambientHrs * 60 * 0.65);
+            const finalProofMinutes = Math.round(state.ambientHrs * 60 * 0.35);
+
+            // Cold Retard Step (if > 0h)
+            let cursorMin = bulkMinutes;
+            if (state.coldHrs > 0) {
+                steps.push({
+                    offsetMin: cursorMin,
+                    badge: `+${(cursorMin / 60).toFixed(1)}h`,
+                    title: isIt ? `Maturazione in Frigo (${state.coldHrs}h a 38°F/4°C)` : `Cold Retard in Fridge (${state.coldHrs}h at 38°F)`,
+                    desc: isIt
+                        ? 'Copri ermeticamente e riponi in frigorifero per lo sviluppo enzimatico degli aromi.'
+                        : 'Cover tightly and refrigerate for slow enzymatic flavor development and fermentation.'
+                });
+                cursorMin += state.coldHrs * 60;
+            }
+
+            // Divide & Shape (Staglio e Formatura)
+            const shapeDescIt = state.style === 'pizza'
+                ? `Staglia in ${state.units} panetti da ~${Math.round((state.flourPerUnit * (1 + state.hydration / 100)))}g (pirlatura stretta).`
+                : (state.style === 'focaccia'
+                    ? 'Stendi delicatamente nella teglia oliata e lascia rilassare l\'impasto.'
+                    : 'Rovescia sul banco, pre-forma e chiudi la pagnotta con tensione superficiale.');
+            const shapeDescEn = state.style === 'pizza'
+                ? `Divide and ball into ${state.units} tight panetti.`
+                : (state.style === 'focaccia'
+                    ? 'Transfer to oiled pan and gently stretch toward corners.'
+                    : 'Turn out onto floured bench, pre-shape, and shape with clean surface tension.');
+
+            steps.push({
+                offsetMin: cursorMin,
+                badge: `+${(cursorMin / 60).toFixed(1)}h`,
+                title: isIt ? 'Staglio e Formatura' : 'Divide & Shape',
+                desc: isIt ? shapeDescIt : shapeDescEn
+            });
+
+            // Final Proof & Preheat
+            const preheatOffset = cursorMin + Math.max(15, finalProofMinutes - 45);
+            steps.push({
+                offsetMin: preheatOffset,
+                badge: `+${(preheatOffset / 60).toFixed(1)}h`,
+                title: isIt ? 'Accensione Forno (Preriscaldamento)' : 'Preheat Oven / Baking Vessel',
+                desc: isIt
+                    ? `Porta il forno / ghisa / pietra a temperatura (${STYLES[state.style].bakeTempBadge}).`
+                    : `Bring oven, Dutch oven, or pizza stone to target heat (${STYLES[state.style].bakeTempBadge}).`
+            });
+
+            const bakeOffset = cursorMin + finalProofMinutes;
+            const bakeDurationMin = state.style === 'pizza' ? 15 : (state.style === 'focaccia' ? 22 : 42);
+
+            steps.push({
+                offsetMin: bakeOffset,
+                badge: `+${(bakeOffset / 60).toFixed(1)}h`,
+                title: isIt ? 'Infornata e Cottura' : 'Score & Bake',
+                desc: isIt
+                    ? `Fine appretto. Inforna seguendo il protocollo termico (${bakeDurationMin} min).`
+                    : `Final proof complete. Load into oven following the thermal protocol (${bakeDurationMin} min).`
+            });
+
+            const totalActiveMin = bakeOffset + bakeDurationMin - (state.preferment !== 'none' ? -prefLeadHours * 60 : 0);
+            const totalHrsFloor = Math.floor(totalActiveMin / 60);
+            const totalMinsRem = totalActiveMin % 60;
+            el.totalDurationBadge.textContent = isIt
+                ? `Totale: ${totalHrsFloor}h ${totalMinsRem}m`
+                : `Total: ${totalHrsFloor}h ${totalMinsRem}m`;
+
+            // Determine t=0 timestamp based on forward ('start') or reverse ('end') mode
+            let tZeroMs = anchorInput.getTime();
+            if (state.scheduleMode === 'start') {
+                // If pre-ferment is used, anchorInput is when the pre-ferment is mixed
+                if (state.preferment !== 'none') {
+                    tZeroMs = anchorInput.getTime() + (prefLeadHours * 3600000);
+                }
+            } else {
+                // Reverse mode: anchorInput is when baking finishes
+                tZeroMs = anchorInput.getTime() - ((bakeOffset + bakeDurationMin) * 60000);
+            }
+
+            const fmtTime = (ms) => {
+                const d = new Date(ms);
+                return d.toLocaleTimeString(isIt ? 'it-IT' : 'en-US', {
+                    weekday: 'short',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            };
+
+            el.scheduleContainer.innerHTML = steps.map((st, idx) => {
+                const stepTimeStr = fmtTime(tZeroMs + st.offsetMin * 60000);
+                const isFirstOrLast = idx === 0 || idx === steps.length - 1;
+                return `
+                    <div class="relative pl-9">
+                        <div class="absolute left-1.5 top-1.5 w-4 h-4 rounded-full ${isFirstOrLast ? 'bg-orange-700 ring-4 ring-orange-100' : 'bg-amber-400 border-2 border-white'} shadow-sm"></div>
+                        <div class="p-3 rounded-xl bg-stone-50/90 border border-stone-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                            <div>
+                                <div class="font-bold text-stone-900 text-xs">${st.title}</div>
+                                <div class="text-[11px] text-stone-600 mt-0.5">${st.desc}</div>
+                            </div>
+                            <div class="mono-font text-[11px] font-bold text-orange-900 bg-orange-100/80 px-2.5 py-1 rounded-lg shrink-0 self-start sm:self-center">
+                                ${stepTimeStr}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // --- Persistence ---
+        function saveState() {
+            try {
+                localStorage.setItem('panePerfettoV4', JSON.stringify(state));
+            } catch (e) {}
+        }
+
+        function loadState() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('panePerfettoV4'));
+                if (saved && STYLES[saved.style]) {
+                    Object.assign(state, saved);
+                }
+            } catch (e) {}
+        }
+
+        // --- Event Listeners ---
+        function bindEvents() {
+            // Style cards
+            el.styleCards.forEach(btn => {
+                btn.addEventListener('click', () => applyStylePreset(btn.dataset.style));
+            });
+
+            el.btnResetStyle.addEventListener('click', () => applyStylePreset(state.style));
+
+            // Pre-ferment buttons
+            el.prefBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    state.preferment = btn.dataset.pref;
+                    el.prefBtns.forEach(b => b.classList.toggle('active', b === btn));
+                    calculateAll();
+                });
+            });
+
+            // Sliders
+            el.flourRange.addEventListener('input', e => { state.flourPerUnit = +e.target.value; calculateAll(); });
+            el.loafRange.addEventListener('input', e => { state.units = +e.target.value; calculateAll(); });
+            el.hydrationRange.addEventListener('input', e => { state.hydration = +e.target.value; calculateAll(); });
+            el.oilRange.addEventListener('input', e => { state.oilPct = +e.target.value; calculateAll(); });
+            el.timeRange.addEventListener('input', e => { state.ambientHrs = +e.target.value; calculateAll(); });
+            el.coldRange.addEventListener('input', e => { state.coldHrs = +e.target.value; calculateAll(); });
+            el.tempRange.addEventListener('input', e => { state.tempF = +e.target.value; calculateAll(); });
+            el.yeastTypeSelect.addEventListener('change', e => { state.yeastType = e.target.value; calculateAll(); });
+            el.startTime.addEventListener('change', () => calculateAll());
+
+            // Forward / Backward Schedule Mode Toggle
+            el.btnToggleScheduleMode.addEventListener('click', () => {
+                state.scheduleMode = state.scheduleMode === 'start' ? 'end' : 'start';
+                if (state.scheduleMode === 'end') {
+                    el.lblClockModeIt.textContent = 'Orario Fine Cottura (Target)';
+                    el.lblClockModeEn.textContent = 'Target Bake Finish Time';
+                    el.btnToggleScheduleMode.innerHTML = `<span class="lang-it">⇄ Calcola da Orario Inizio</span><span class="lang-en">⇄ Plan by Mix Start Time</span>`;
+                } else {
+                    el.lblClockModeIt.textContent = 'Orario Inizio';
+                    el.lblClockModeEn.textContent = 'Start Time';
+                    el.btnToggleScheduleMode.innerHTML = `<span class="lang-it">⇄ Calcola da Fine Cottura</span><span class="lang-en">⇄ Plan by Target Bake Time</span>`;
+                }
+                calculateAll();
+            });
+
+            // Language Switcher
+            const setLang = (lang) => {
+                state.lang = lang;
+                el.body.classList.toggle('lang-it', lang === 'it');
+                el.body.classList.toggle('lang-en', lang === 'en');
+                el.btnIt.className = lang === 'it'
+                    ? 'px-2.5 py-1 rounded-full bg-orange-800 text-white transition-all'
+                    : 'px-2.5 py-1 rounded-full text-stone-500 hover:text-orange-900 transition-all';
+                el.btnEn.className = lang === 'en'
+                    ? 'px-2.5 py-1 rounded-full bg-orange-800 text-white transition-all'
+                    : 'px-2.5 py-1 rounded-full text-stone-500 hover:text-orange-900 transition-all';
+                calculateAll();
+            };
+
+            el.btnIt.addEventListener('click', () => setLang('it'));
+            el.btnEn.addEventListener('click', () => setLang('en'));
+
+            // Copy Recipe Summary
+            el.btnCopyRecipe.addEventListener('click', () => {
+                const s = STYLES[state.style];
+                const totalFlour = state.flourPerUnit * state.units;
+                const summary = [
+                    `PANE PERFETTO v4.0 — ${s.nameIt}`,
+                    `Unità: ${state.units} × ${state.flourPerUnit}g farina (${state.hydration}% idratazione)`,
+                    `Farina Totale: ${totalFlour}g | Acqua: ${Math.round(totalFlour * state.hydration / 100)}g | Sale: ${(totalFlour * state.saltPct / 100).toFixed(1)}g`,
+                    state.oilPct > 0 ? `Olio EVO: ${Math.round(totalFlour * state.oilPct / 100)}g` : null,
+                    `Lievito (${state.yeastType.toUpperCase()}): ${el.resYeast.textContent} | Temp: ${state.tempF}°F | Lievitazione: ${state.ambientHrs}h amb + ${state.coldHrs}h frigo`
+                ].filter(Boolean).join('\n');
+
+                navigator.clipboard.writeText(summary).then(() => {
+                    const orig = el.btnCopyRecipe.innerHTML;
+                    el.btnCopyRecipe.innerHTML = `<span>✅</span><span>Copiato!</span>`;
+                    setTimeout(() => { el.btnCopyRecipe.innerHTML = orig; }, 1800);
+                });
+            });
+        }
+
+        // --- Boot ---
+        setDefaultStartTime();
+        loadState();
+        // Sync controls with loaded state
+        el.flourRange.value = state.flourPerUnit;
+        el.loafRange.value = state.units;
+        el.hydrationRange.value = state.hydration;
+        el.oilRange.value = state.oilPct;
+        el.timeRange.value = state.ambientHrs;
+        el.coldRange.value = state.coldHrs;
+        el.tempRange.value = state.tempF;
+        el.yeastTypeSelect.value = state.yeastType;
+        el.styleCards.forEach(b => b.classList.toggle('active', b.dataset.style === state.style));
+        el.prefBtns.forEach(b => b.classList.toggle('active', b.dataset.pref === state.preferment));
+        bindEvents();
+        calculateAll();
+    </script>
 </body>
 </html>
